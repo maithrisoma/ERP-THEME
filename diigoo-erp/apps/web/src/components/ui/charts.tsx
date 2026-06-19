@@ -15,11 +15,14 @@ export function Donut({ segments, size = 132, thickness = 16, centerLabel, cente
 }) {
   const dark = useTheme((s) => s.theme === "dark");
   const [active, setActive] = React.useState<number | null>(null);
+  const [hover, setHover] = React.useState<number | null>(null);
   const total = segments.reduce((a, s) => a + s.value, 0) || 1;
   const r = (size - thickness) / 2 - 2; // 2px headroom so the active slice's +3 stroke never clips
   const c = 2 * Math.PI * r;
   let offset = 0;
-  const sel = active !== null ? segments[active] : null;
+  // hover previews a segment; a click pins it so it stays after the mouse leaves.
+  const cur = hover !== null ? hover : active;
+  const sel = cur !== null ? segments[cur] : null;
   const pct = sel ? Math.round((sel.value / total) * 100) : null;
   const toggle = (i: number) => setActive((a) => (a === i ? null : i));
   return (
@@ -28,13 +31,14 @@ export function Donut({ segments, size = 132, thickness = 16, centerLabel, cente
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgb(var(--line))" strokeWidth={thickness} />
         {segments.map((s, i) => {
           const len = (s.value / total) * c;
-          const on = active === i;
-          const dim = active !== null && !on;
+          const on = cur === i;
+          const dim = cur !== null && !on;
           const el = (
             <circle key={i} cx={size / 2} cy={size / 2} r={r} fill="none" stroke={on ? toneColor(s.tone, dark) : pale(s.tone, dark ? 0.1 : 0.4)}
               strokeWidth={on ? thickness + 3 : thickness}
               strokeDasharray={`${len} ${c - len}`} strokeDashoffset={-offset} strokeLinecap="butt"
               opacity={dim ? 0.45 : 1} onClick={() => toggle(i)}
+              onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
               className="cursor-pointer transition-all duration-200" role="button" aria-label={`${s.label}: ${s.value}`} />
           );
           offset += len;
@@ -49,11 +53,12 @@ export function Donut({ segments, size = 132, thickness = 16, centerLabel, cente
       </svg>
       <ul className="space-y-1">
         {segments.map((s, i) => {
-          const on = active === i;
+          const on = cur === i;
           return (
             <li key={i}>
               <button type="button" onClick={() => toggle(i)}
-                className={`flex w-full items-center gap-2 rounded-md px-1.5 py-1 text-xs transition-colors hover:bg-subtle ${on ? "bg-subtle" : ""} ${active !== null && !on ? "opacity-50" : ""}`}>
+                onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
+                className={`flex w-full items-center gap-2 rounded-md px-1.5 py-1 text-xs transition-colors hover:bg-subtle ${on ? "bg-subtle" : ""} ${cur !== null && !on ? "opacity-50" : ""}`}>
                 <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: toneColor(s.tone, dark) }} />
                 <span className={`font-medium ${on ? "text-navy" : "text-ink-2"}`}>{s.label}</span>
                 <span className="ml-auto font-mono font-semibold text-navy">{s.value}</span>
@@ -80,22 +85,29 @@ export function BarChart({ data, height = 140, tone, colors, valueFmt }: {
 }) {
   const dark = useTheme((s) => s.theme === "dark");
   const [active, setActive] = React.useState<number | null>(null);
+  const [hover, setHover] = React.useState<number | null>(null);
   const max = Math.max(...data.map((d) => d.value), 1);
   const total = data.reduce((a, d) => a + d.value, 0) || 1;
   const fmt = (v: number) => (valueFmt ? valueFmt(v) : `${v}`);
   const barColor = (i: number) =>
     toneColor(colors ? colors[i % colors.length] : tone ? tone : CHART_TONES[i % CHART_TONES.length], dark);
+  // hover previews a bar; a click pins it so the tooltip stays after the mouse leaves.
+  const cur = hover !== null ? hover : active;
   return (
     <div className="flex items-end gap-2.5" style={{ height }}>
       {data.map((d, i) => {
         const c = barColor(i);
-        const on = active === i;
-        const dim = active !== null && !on;
+        const on = cur === i;
+        const dim = cur !== null && !on;
         return (
           <button
             key={i}
             type="button"
-            onClick={() => setActive(on ? null : i)}
+            onClick={() => setActive((a) => (a === i ? null : i))}
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover(null)}
+            onFocus={() => setHover(i)}
+            onBlur={() => setHover(null)}
             aria-label={`${d.label}: ${fmt(d.value)}`}
             className="group relative flex flex-1 cursor-pointer flex-col items-center justify-end gap-1.5 focus:outline-none"
           >

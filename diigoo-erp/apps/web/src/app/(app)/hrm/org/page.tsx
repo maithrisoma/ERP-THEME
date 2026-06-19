@@ -1,10 +1,11 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
-import { Users, Building2, UserCog, GitBranch, Briefcase, ChevronRight, ChevronDown, ChevronsUpDown, ChevronsDownUp, Network, LayoutGrid, MapPin, Crown } from "@/components/icon/lucide";
+import { Users, Building2, UserCog, GitBranch, Briefcase, ChevronRight, ChevronDown, ChevronsUpDown, ChevronsDownUp, Network, LayoutGrid, MapPin, Crown, Check } from "@/components/icon/lucide";
 import { cn } from "@/lib/cn";
+import { useClickAway } from "@/lib/hooks";
 import { PageHeader, Card, StatCard, Avatar, Button, useToneColor, type Tone } from "@/components/ui/primitives";
-import { Select, SearchInput } from "@/components/ui/form";
+import { SearchInput } from "@/components/ui/form";
 import { FeatureGate } from "@/components/ui/gate";
 import { db } from "@/modules/hrm/repo";
 import { departments, departmentName, positionTitle, locationName } from "@/modules/hrm/data";
@@ -110,10 +111,7 @@ function OrgChart() {
       <Card className="mb-4 mt-4" padded={false}>
         <div className="flex flex-wrap items-center gap-2 border-b border-line p-3">
           <SearchInput value={search} onChange={setSearch} placeholder="Find a person…" className="min-w-[200px] flex-1" />
-          <Select value={dept} onChange={(e) => setDept(e.target.value)} className="sm:!w-48">
-            <option value="">All departments</option>
-            {usedDepts.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-          </Select>
+          <DeptFilter value={dept} options={usedDepts} onChange={setDept} tc={tc} />
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
           <span className="text-2xs font-bold uppercase tracking-wide text-ink-3">Teams</span>
@@ -222,5 +220,59 @@ function TeamCard({ dept, members, head, tc }: { dept: { id: string; name: strin
         ))}
       </div>
     </Card>
+  );
+}
+
+// Designed department filter — a styled popover (colour dots + checkmark) in
+// place of the bare native <select>.
+function DeptFilter({ value, options, onChange, tc }: { value: string; options: { id: string; name: string }[]; onChange: (v: string) => void; tc: (t: Tone) => string }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = useClickAway<HTMLDivElement>(() => setOpen(false));
+  const current = options.find((o) => o.id === value);
+  return (
+    <div ref={ref} className="relative w-full sm:w-52">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={cn(
+          "flex w-full items-center justify-between gap-2 rounded-md border bg-surface px-3 py-2 text-sm font-medium text-navy shadow-sm transition-colors",
+          open ? "border-orange ring-2 ring-orange/20" : "border-line hover:border-orange/40",
+        )}
+      >
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: current ? tc(deptTone(current.id)) : "rgb(var(--ink-3))" }} />
+          <span className="truncate">{current ? current.name : "All departments"}</span>
+        </span>
+        <ChevronDown size={14} className={cn("shrink-0 text-ink-3 transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="animate-fade-in absolute right-0 z-50 mt-1.5 max-h-80 w-60 overflow-y-auto rounded-lg border border-line bg-surface p-1.5 shadow-pop">
+          <DeptItem active={value === ""} label="All departments" onClick={() => { onChange(""); setOpen(false); }} />
+          <div className="my-1 border-t border-line" />
+          {options.map((d) => (
+            <DeptItem key={d.id} active={value === d.id} label={d.name} dot={tc(deptTone(d.id))} onClick={() => { onChange(d.id); setOpen(false); }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeptItem({ active, label, dot, onClick }: { active: boolean; label: string; dot?: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
+        active ? "bg-orange/10 font-semibold text-orange" : "text-ink-2 hover:bg-subtle",
+      )}
+    >
+      <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: dot ?? "rgb(var(--ink-3))" }} />
+      <span className="min-w-0 flex-1 truncate text-left">{label}</span>
+      {active && <Check size={15} className="shrink-0 text-orange" />}
+    </button>
   );
 }

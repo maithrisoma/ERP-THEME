@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Bell, ChevronDown, ChevronRight, Menu, Search, LogOut, Crown, Mail, ShieldCheck, Palmtree, Wallet, FileText, UserPlus, CheckCheck, Contact, Megaphone, Plug, KeyRound, CalendarCheck, Sun, Moon, type LucideIcon } from "@/components/icon/lucide";
 import { cn } from "@/lib/cn";
 import { useClickAway } from "@/lib/hooks";
@@ -14,6 +14,15 @@ import { ensureModulesRegistered, allModules } from "@/modules/registry";
 import { Avatar, Tag, type Tone } from "@/components/ui/primitives";
 
 ensureModulesRegistered();
+
+// Top navigation tabs (shown next to the brand).
+const TOP_NAV: { label: string; href: string }[] = [
+  { label: "Dashboard", href: "/dashboard" },
+  { label: "Projects", href: "/projects" },
+  { label: "Files", href: "/files" },
+  { label: "About", href: "/about" },
+  { label: "Settings", href: "/settings" },
+];
 
 interface Notif { id: string; icon: LucideIcon; tone: string; title: string; body: string; time: string; href?: string; read: boolean }
 
@@ -77,6 +86,7 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
   const menuRef = useClickAway<HTMLDivElement>(() => setMenuOpen(false));
 
   const router = useRouter();
+  const pathname = usePathname();
   const theme = useTheme((s) => s.theme);
   const toggleTheme = useTheme((s) => s.toggle);
   const [notifOpen, setNotifOpen] = React.useState(false);
@@ -161,6 +171,25 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
             <div className="truncate text-2xs text-ink-3"><span className="text-orange">Diigoo</span> ERP · {tenant.branding.productName}</div>
           </div>
         </div>
+
+        {/* Top nav */}
+        <nav className="ml-2 hidden items-center gap-0.5 lg:flex">
+          {TOP_NAV.map((t) => {
+            const active = pathname === t.href || pathname.startsWith(t.href + "/");
+            return (
+              <Link
+                key={t.href}
+                href={t.href}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-sm font-semibold transition-colors",
+                  active ? "bg-orange text-white shadow-sm" : "text-ink-2 hover:bg-subtle hover:text-navy",
+                )}
+              >
+                {t.label}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Search */}
