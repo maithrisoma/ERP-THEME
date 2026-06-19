@@ -1,0 +1,19 @@
+{
+  "name": "diigoo-erp",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Diigoo Tech — Unified Retail & Commerce ERP. Modular platform; HRM module first.",
+  "packageManager": "pnpm@11.6.0",
+  "scripts": {
+    "dev": "pnpm -C apps/web dev",
+    "build": "pnpm -C apps/web build",
+    "start": "pnpm -C apps/web start",
+    "lint": "pnpm -C apps/web lint",
+    "typecheck": "pnpm -C apps/web typecheck",
+    "stack:up": "docker compose up --build",
+    "stack:down": "docker compose down"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  }
+}

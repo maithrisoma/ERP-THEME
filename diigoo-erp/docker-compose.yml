@@ -1,0 +1,60 @@
+# ════════════════════════════════════════════════════════════════════════
+# Full Diigoo ERP stack: PostgreSQL + Rust core (Axum/SQLx) + Next.js web.
+#
+#   docker compose up --build
+#
+# - db   : Postgres 16, schema + seed auto-applied from db/migrations
+# - core : Rust gateway serving /api/v1 (HRM + CRM), RLS-scoped
+# - web  : Next.js app in `core` adapter mode, proxying the BFF to the core
+#
+# Prefer the zero-dependency path? Just run the web app standalone instead:
+#   pnpm install && pnpm dev    (DATA_ADAPTER defaults to mock)
+# ════════════════════════════════════════════════════════════════════════
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: diigoo
+      POSTGRES_PASSWORD: diigoo
+      POSTGRES_DB: diigoo_erp
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U diigoo -d diigoo_erp"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  core:
+    build:
+      context: ./services/core
+    environment:
+      # Connect as the non-superuser app role so RLS is enforced at runtime.
+      DATABASE_URL: postgres://diigoo_app:diigoo_app@db:5432/diigoo_erp
+      BIND_ADDR: 0.0.0.0:8080
+      JWT_SECRET: dev-only-change-me-in-production-please
+      RUST_LOG: info,gateway=debug,hrm=debug
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      DATA_ADAPTER: core
+      CORE_API_URL: http://core:8080
+      DEFAULT_TENANT_ID: t_diigoo_demo
+    ports:
+      - "3000:3000"
+    depends_on:
+      - core
+
+volumes:
+  pgdata:

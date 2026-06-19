@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unified Retail & Commerce ERP — Architecture Document | Diigoo Tech</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap');
+
+:root {
+  --navy: #1B2A4A;
+  --orange: #FF4500;
+  --silver: #C0C8D8;
+  --white: #FFFFFF;
+  --ink: #111827;
+  --ink2: #374151;
+  --ink3: #6B7280;
+  --bg: #F8F9FB;
+  --border: #E5E7EB;
+  --teal: #0D9488;
+  --blue: #1D4ED8;
+  --purple: #7C3AED;
+  --green: #16A34A;
+  --amber: #D97706;
+  --coral: #DC2626;
+  --r: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #EAEDF2;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ─── PRINT ─── */
+@media print {
+  body { background: white; }
+  .no-print { display: none !important; }
+  .page { 
+    box-shadow: none !important; 
+    margin: 0 !important;
+    border-radius: 0 !important;
+    page-break-after: always;
+    break-after: page;
+  }
+  .page:last-child { page-break-after: auto; }
+  .arch-section { page-break-inside: avoid; }
+  @page { margin: 15mm 12mm; size: A4; }
+}
+
+/* ─── SCREEN NAV ─── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.25);
+}
+.topbar-brand { display: flex; align-items: center; gap: 10px; }
+.topbar-brand span { color: white; font-weight: 700; font-size: 14px; letter-spacing: .5px; }
+.topbar-brand em { color: var(--orange); font-style: normal; }
+.print-btn {
+  background: var(--orange); color: white;
+  border: none; border-radius: var(--r);
+  padding: 7px 18px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  letter-spacing: .3px;
+  transition: opacity .15s;
+}
+.print-btn:hover { opacity: .88; }
+
+/* ─── TOC NAV ─── */
+.toc-bar {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0 24px;
+}
+.toc-bar a {
+  display: inline-block;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink3);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+}
+.toc-bar a:hover { color: var(--navy); border-bottom-color: var(--orange); }
+
+/* ─── WRAPPER ─── */
+.doc-wrap { max-width: 1100px; margin: 24px auto; display: flex; flex-direction: column; gap: 20px; padding: 0 16px; }
+
+/* ─── PAGE CARD ─── */
+.page {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.08);
+  overflow: hidden;
+}
+
+/* ─── COVER PAGE ─── */
+.cover {
+  background: var(--navy);
+  min-height: 480px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 56px 64px 48px;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute; top: -80px; right: -80px;
+  width: 360px; height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,69,0,.18) 0%, transparent 70%);
+}
+.cover::after {
+  content: '';
+  position: absolute; bottom: -60px; left: -40px;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.04) 0%, transparent 70%);
+}
+.cover-top { position: relative; z-index: 2; }
+.cover-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 48px;
+}
+.cover-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px; font-weight: 700;
+  color: white; line-height: 1.15;
+  margin-bottom: 12px;
+}
+.cover-title em { color: var(--orange); font-style: normal; }
+.cover-sub {
+  font-size: 16px; color: var(--silver);
+  font-weight: 300; margin-bottom: 32px;
+}
+.cover-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.cover-tag {
+  background: rgba(255,255,255,.1);
+  color: var(--silver);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: .5px;
+}
+.cover-bottom {
+  position: relative; z-index: 2;
+  display: flex; justify-content: space-between; align-items: flex-end;
+}
+.cover-meta { color: var(--silver); font-size: 12px; line-height: 1.9; }
+.cover-meta strong { color: white; }
+.cover-badge {
+  background: var(--orange);
+  color: white; font-size: 11px; font-weight: 700;
+  padding: 8px 20px; border-radius: var(--r);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* ─── SECTION HEADERS ─── */
+.sec-header {
+  background: var(--navy);
+  padding: 24px 40px;
+  display: flex; align-items: center; gap: 16px;
+}
+.sec-num {
+  background: var(--orange);
+  color: white; font-weight: 700; font-size: 13px;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sec-title { color: white; font-size: 20px; font-weight: 700; }
+.sec-desc { color: var(--silver); font-size: 13px; margin-top: 2px; }
+
+/* ─── SECTION BODY ─── */
+.sec-body { padding: 32px 40px; }
+
+/* ─── ARCH DIAGRAM CONTAINERS ─── */
+.arch-section {
+  margin-bottom: 28px;
+}
+.arch-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--orange);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.arch-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ─── LAYER DIAGRAMS ─── */
+.layer-stack { display: flex; flex-direction: column; gap: 4px; }
+.layer {
+  display: flex; align-items: stretch;
+  border-radius: var(--r); overflow: hidden;
+  border: 1px solid var(--border);
+  min-height: 52px;
+}
+.layer-name {
+  width: 130px; flex-shrink: 0;
+  background: var(--navy); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  text-align: center; padding: 8px;
+}
+.layer-content {
+  flex: 1; display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 8px 12px; align-items: center;
+  background: var(--bg);
+}
+.chip {
+  padding: 4px 10px; border-radius: 4px;
+  font-size: 11px; font-weight: 500;
+  white-space: nowrap;
+}
+.chip-navy { background: #E8EDF7; color: var(--navy); border: 1px solid #C5D0E8; }
+.chip-teal { background: #CCFBF1; color: #0F766E; border: 1px solid #99F6E4; }
+.chip-blue { background: #DBEAFE; color: var(--blue); border: 1px solid #BFDBFE; }
+.chip-purple { background: #EDE9FE; color: #6D28D9; border: 1px solid #DDD6FE; }
+.chip-green { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+.chip-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+.chip-coral { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+.chip-gray { background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; }
+.chip-orange { background: #FFF0EB; color: #C43A00; border: 1px solid #FFCDB9; }
+
+/* ─── GRID MODULES ─── */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.module-card {
+  border-radius: var(--r);
+  padding: 12px 10px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.module-card .m-num { 
+  font-size: 10px; color: var(--ink3); font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 4px;
+}
+.module-card .m-name { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.module-card .m-tech { font-size: 10px; color: var(--ink3); line-height: 1.4; }
+.mc-teal { background: #F0FDFA; border-color: #99F6E4; }
+.mc-coral { background: #FFF5F5; border-color: #FECACA; }
+.mc-amber { background: #FFFBEB; border-color: #FDE68A; }
+.mc-purple { background: #FAF5FF; border-color: #DDD6FE; }
+
+/* ─── TABLES ─── */
+.arch-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.arch-table th {
+  background: var(--navy); color: white;
+  padding: 9px 12px; text-align: left;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .5px;
+}
+.arch-table th:first-child { border-radius: 6px 0 0 0; }
+.arch-table th:last-child { border-radius: 0 6px 0 0; }
+.arch-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.arch-table tr:last-child td { border-bottom: none; }
+.arch-table tr:nth-child(even) td { background: var(--bg); }
+.arch-table tr:hover td { background: #EEF2FF; }
+.arch-table code { 
+  background: #F3F4F6; padding: 1px 5px; border-radius: 3px;
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--navy);
+}
+.arch-table .badge {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 12px; font-size: 10px; font-weight: 600;
+}
+
+/* ─── FLOW DIAGRAMS (CSS-based) ─── */
+.flow-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 12px 0; }
+.flow-box {
+  background: var(--navy); color: white;
+  padding: 10px 16px; border-radius: var(--r);
+  font-size: 11px; font-weight: 600;
+  text-align: center; min-width: 100px;
+}
+.flow-box.alt { background: var(--teal); }
+.flow-box.warn { background: var(--amber); }
+.flow-box.ok { background: var(--green); }
+.flow-box.err { background: var(--coral); }
+.flow-box.light { background: var(--bg); color: var(--navy); border: 1px solid var(--border); }
+.flow-arrow {
+  color: var(--orange); font-size: 18px;
+  padding: 0 8px; flex-shrink: 0;
+}
+.flow-label { font-size: 10px; color: var(--ink3); text-align: center; margin-top: 3px; }
+
+/* ─── TWO COLUMN ─── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* ─── COMPONENT BOXES ─── */
+.comp-box {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.comp-box-head {
+  background: var(--navy); color: white;
+  padding: 9px 14px; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+}
+.comp-box-head .dot { 
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.comp-box-body { padding: 12px 14px; background: var(--bg); }
+.comp-box-body ul { list-style: none; }
+.comp-box-body ul li {
+  font-size: 11px; color: var(--ink2); padding: 3px 0;
+  display: flex; gap: 6px;
+}
+.comp-box-body ul li::before { content: '›'; color: var(--orange); font-weight: 700; }
+
+/* ─── RBAC MATRIX ─── */
+.rbac-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+.rbac-table th { 
+  background: var(--navy); color: white;
+  padding: 7px 6px; text-align: center;
+  font-size: 10px; font-weight: 600;
+}
+.rbac-table th:first-child { text-align: left; padding-left: 10px; }
+.rbac-table td { padding: 6px; border-bottom: 1px solid var(--border); text-align: center; }
+.rbac-table td:first-child { text-align: left; padding-left: 10px; font-weight: 600; color: var(--navy); }
+.rbac-table tr:nth-child(even) td { background: var(--bg); }
+.perm-full { color: var(--green); font-weight: 700; font-size: 11px; }
+.perm-view { color: var(--blue); font-size: 11px; }
+.perm-edit { color: var(--amber); font-size: 11px; }
+.perm-none { color: var(--border); font-size: 11px; }
+.perm-op { color: var(--purple); font-size: 11px; }
+
+/* ─── INFRA TIERS ─── */
+.infra-env { 
+  display: grid; grid-template-columns: repeat(4,1fr); 
+  gap: 10px; margin-top: 12px;
+}
+.env-card {
+  border-radius: var(--r); overflow: hidden;
+  border: 1px solid var(--border);
+}
+.env-card-head {
+  padding: 9px 12px; font-size: 12px; font-weight: 700;
+  color: white;
+}
+.env-card-body { padding: 10px 12px; background: var(--bg); }
+.env-card-body p { font-size: 11px; color: var(--ink2); margin-bottom: 4px; }
+
+/* ─── SLA TABLE ─── */
+.sla-grid {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 10px; margin-top: 8px;
+}
+.sla-card {
+  border-radius: var(--r); padding: 16px;
+  border: 1px solid var(--border); text-align: center;
+}
+.sla-card .sla-tier { font-size: 11px; font-weight: 700; color: var(--ink3); letter-spacing: 1px; text-transform: uppercase; }
+.sla-card .sla-pct { font-size: 26px; font-weight: 700; color: var(--navy); font-family: 'DM Mono', monospace; }
+.sla-card .sla-detail { font-size: 10px; color: var(--ink3); margin-top: 4px; line-height: 1.6; }
+
+/* ─── SECURITY LAYERS ─── */
+.sec-layers { display: flex; flex-direction: column; gap: 6px; }
+.sec-layer {
+  border-radius: var(--r); overflow: hidden;
+  border: 1px solid var(--border);
+}
+.sec-layer-head {
+  padding: 8px 14px; font-size: 12px; font-weight: 700;
+  color: white; display: flex; justify-content: space-between; align-items: center;
+}
+.sec-layer-body { padding: 10px 14px; font-size: 11px; color: var(--ink2); line-height: 1.7; }
+
+/* ─── KAFKA TOPICS ─── */
+.topic-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.topic-card {
+  border-radius: var(--r); border: 1px solid var(--border);
+  overflow: hidden;
+}
+.topic-card-head { 
+  background: var(--navy); color: white; 
+  padding: 8px 12px; font-family: 'DM Mono', monospace; 
+  font-size: 11px; font-weight: 500;
+}
+.topic-card-body { padding: 10px 12px; background: var(--bg); font-size: 11px; color: var(--ink2); line-height: 1.6; }
+
+/* ─── OFFLINE FLOW ─── */
+.offline-states {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 16px; align-items: center;
+}
+.offline-device, .offline-cloud {
+  border: 1px solid var(--border); border-radius: var(--r);
+  overflow: hidden;
+}
+.offline-head { padding: 10px 14px; font-weight: 700; font-size: 13px; color: white; }
+.offline-body { padding: 12px 14px; background: var(--bg); }
+.offline-item { 
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11px;
+}
+.offline-item:last-child { border-bottom: none; }
+.offline-arrow {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; font-size: 11px; color: var(--ink3);
+  font-weight: 600;
+}
+.big-arrow { font-size: 28px; color: var(--orange); }
+
+/* ─── FOOTER ─── */
+.doc-footer {
+  background: var(--navy);
+  padding: 20px 40px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.doc-footer p { color: var(--silver); font-size: 11px; }
+.doc-footer strong { color: white; }
+.page-num { color: var(--orange); font-family: 'DM Mono', monospace; font-weight: 700; }
+
+/* ─── UTIL ─── */
+.mt16 { margin-top: 16px; }
+.mt24 { margin-top: 24px; }
+.mb8 { margin-bottom: 8px; }
+.text-orange { color: var(--orange); }
+.text-navy { color: var(--navy); }
+.mono { font-family: 'DM Mono', monospace; }
+.sub-section-title { 
+  font-size: 14px; font-weight: 700; color: var(--navy);
+  margin: 20px 0 10px; padding-bottom: 6px;
+  border-bottom: 2px solid var(--orange);
+  display: flex; align-items: center; gap: 8px;
+}
+.sub-section-title::before { 
+  content: ''; display: inline-block;
+  width: 4px; height: 16px; background: var(--orange); border-radius: 2px;
+}
+.note-box {
+  background: #FFFBEB; border: 1px solid #FDE68A;
+  border-left: 3px solid var(--amber);
+  border-radius: var(--r); padding: 10px 14px;
+  font-size: 11px; color: #92400E; margin-top: 12px;
+}
+.note-box strong { display: block; margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ─── SCREEN NAV ─── -->
+<div class="topbar no-print">
+  <div class="topbar-brand">
+    <span><em>Diigoo</em> Tech · Unified Retail ERP</span>
+  </div>
+  <button class="print-btn" onclick="window.print()">⎙ Print / Export PDF</button>
+</div>
+<div class="toc-bar no-print">
+  <a href="#cover">Cover</a>
+  <a href="#system">System Architecture</a>
+  <a href="#application">Application Layer</a>
+  <a href="#data">Data Architecture</a>
+  <a href="#devops">DevOps Architecture</a>
+  <a href="#infra">Infrastructure</a>
+  <a href="#security">Security</a>
+  <a href="#offline">Offline-First</a>
+  <a href="#integration">Integration</a>
+  <a href="#ai">AI Engine</a>
+  <a href="#project">Project Architecture</a>
+  <a href="#rbac">RBAC</a>
+  <a href="#api">API Design</a>
+  <a href="#sla">SLA & Performance</a>
+</div>
+
+<div class="doc-wrap">
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 1 — COVER
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="cover">
+  <div class="cover">
+    <div class="cover-top">
+      <div class="cover-logo">Diigoo Tech Private Limited</div>
+      <div class="cover-title">Unified Retail &<br><em>Commerce ERP</em></div>
+      <div class="cover-sub">Complete System Architecture Reference Document</div>
+      <div class="cover-tags">
+        <span class="cover-tag">System Architecture</span>
+        <span class="cover-tag">DevOps Architecture</span>
+        <span class="cover-tag">Application Architecture</span>
+        <span class="cover-tag">Data Architecture</span>
+        <span class="cover-tag">Security Architecture</span>
+        <span class="cover-tag">Integration Architecture</span>
+        <span class="cover-tag">AI Engine Architecture</span>
+        <span class="cover-tag">Project Architecture</span>
+        <span class="cover-tag">RBAC Design</span>
+        <span class="cover-tag">API Design</span>
+        <span class="cover-tag">SLA & Performance</span>
+        <span class="cover-tag">Offline-First</span>
+      </div>
+    </div>
+    <div class="cover-bottom">
+      <div class="cover-meta">
+        <strong>Document</strong> Platform Architecture v2.0<br>
+        <strong>Product</strong> Unified Retail & Commerce ERP<br>
+        <strong>Company</strong> Diigoo Tech Private Limited<br>
+        <strong>Classification</strong> Confidential · Internal Use Only<br>
+        <strong>Date</strong> 2025
+      </div>
+      <div class="cover-badge">Confidential</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 2 — SYSTEM ARCHITECTURE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="system">
+  <div class="sec-header">
+    <div class="sec-num">1</div>
+    <div>
+      <div class="sec-title">System Architecture</div>
+      <div class="sec-desc">Full-stack layer diagram — clients through infrastructure</div>
+    </div>
+  </div>
+  <div class="sec-body">
+
+    <div class="arch-section">
+      <div class="arch-label">High-level layer stack</div>
+      <div class="layer-stack">
+        <div class="layer">
+          <div class="layer-name">Client Layer</div>
+          <div class="layer-content">
+            <span class="chip chip-blue">Web App (Next.js)</span>
+            <span class="chip chip-blue">Mobile App iOS/Android</span>
+            <span class="chip chip-blue">POS Terminal (React PWA)</span>
+            <span class="chip chip-blue">Driver App</span>
+            <span class="chip chip-blue">Customer Loyalty App</span>
+            <span class="chip chip-gray">3rd-party API clients</span>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-name">Edge / CDN</div>
+          <div class="layer-content">
+            <span class="chip chip-purple">Cloudflare / CloudFront CDN</span>
+            <span class="chip chip-purple">Global POP distribution</span>
+            <span class="chip chip-purple">DDoS protection</span>
+            <span class="chip chip-purple">WAF rules</span>
+            <span class="chip chip-purple">TLS 1.3 termination</span>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-name">API Gateway</div>
+          <div class="layer-content">
+            <span class="chip chip-navy">Kong / AWS API Gateway</span>
+            <span class="chip chip-navy">Auth token validation</span>
+            <span class="chip chip-navy">Rate limiting</span>
+            <span class="chip chip-navy">Request routing</span>
+            <span class="chip chip-navy">API versioning</span>
+            <span class="chip chip-navy">Request logging</span>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-name">Application</div>
+          <div class="layer-content">
+            <span class="chip chip-teal">15 microservices (Node.js/TypeScript)</span>
+            <span class="chip chip-teal">REST + gRPC internal</span>
+            <span class="chip chip-teal">Saga orchestration</span>
+            <span class="chip chip-amber">AI/ML services (Python FastAPI)</span>
+            <span class="chip chip-amber">GPU model serving</span>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-name">Messaging</div>
+          <div class="layer-content">
+            <span class="chip chip-orange">Apache Kafka (event bus)</span>
+            <span class="chip chip-orange">Topics: transactions · inventory · alerts · deliveries · analytics</span>
+            <span class="chip chip-gray">RabbitMQ (task queues)</span>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-name">Data</div>
+          <div class="layer-content">
+            <span class="chip chip-blue">PostgreSQL (primary OLTP)</span>
+            <span class="chip chip-blue">ClickHouse (OLAP analytics)</span>
+            <span class="chip chip-green">Redis (cache/sessions)</span>
+            <span class="chip chip-purple">Elasticsearch (search)</span>
+            <span class="chip chip-coral">CouchDB (offline sync)</span>
+            <span class="chip chip-teal">TimescaleDB (time-series)</span>
+            <span class="chip chip-gray">S3/GCS (object storage)</span>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-name">Offline Sync</div>
+          <div class="layer-content">
+            <span class="chip chip-coral">PouchDB on device</span>
+            <span class="chip chip-coral">SQLite local cache</span>
+            <span class="chip chip-coral">CRDT conflict resolution</span>
+            <span class="chip chip-coral">CouchDB bi-directional replication</span>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-name">Infrastructure</div>
+          <div class="layer-content">
+            <span class="chip chip-navy">Kubernetes (EKS/GKE/AKS)</span>
+            <span class="chip chip-navy">Multi-region active-active</span>
+            <span class="chip chip-navy">Auto-scaling (HPA/VPA)</span>
+            <span class="chip chip-navy">AWS / GCP / Azure</span>
+            <span class="chip chip-gray">HashiCorp Vault (secrets)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Core design principles</div>
+      <div class="three-col">
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#3B82F6"></div>Offline-First</div>
+          <div class="comp-box-body"><ul>
+            <li>Every critical function works without internet</li>
+            <li>SQLite + PouchDB on device</li>
+            <li>CRDT merge on reconnect</li>
+            <li>Visual sync indicator</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#7C3AED"></div>AI-Native</div>
+          <div class="comp-box-body"><ul>
+            <li>Intelligence at every layer</li>
+            <li>Demand forecasting (LightGBM)</li>
+            <li>Fraud detection (Isolation Forest)</li>
+            <li>NL queries (GPT-4o / Claude)</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#0D9488"></div>Multi-Tenant</div>
+          <div class="comp-box-body"><ul>
+            <li>Full tenant data isolation</li>
+            <li>Row-Level Security (RLS)</li>
+            <li>Tenant-scoped config & branding</li>
+            <li>Multi-location per tenant</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#FF4500"></div>API-First</div>
+          <div class="comp-box-body"><ul>
+            <li>Every function exposed as API</li>
+            <li>OpenAPI 3.1 documentation</li>
+            <li>REST + GraphQL (analytics)</li>
+            <li>HMAC-signed webhooks</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#16A34A"></div>Real-Time</div>
+          <div class="comp-box-body"><ul>
+            <li>Kafka event streaming</li>
+            <li>WebSocket for live dashboards</li>
+            <li>Push notifications (FCM/APNs)</li>
+            <li>Cross-location sync in &lt;500ms</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#D97706"></div>Modular</div>
+          <div class="comp-box-body"><ul>
+            <li>15 independently deployable modules</li>
+            <li>Feature flags per tenant/tier</li>
+            <li>Add-ons (Lottery, Gas Station)</li>
+            <li>Module enable/disable in Admin</li>
+          </ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">01</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 3 — APPLICATION LAYER
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="application">
+  <div class="sec-header">
+    <div class="sec-num">2</div>
+    <div>
+      <div class="sec-title">Application Layer Architecture</div>
+      <div class="sec-desc">15 microservices, event-driven messaging, and shared services</div>
+    </div>
+  </div>
+  <div class="sec-body">
+
+    <div class="arch-section">
+      <div class="arch-label">15 business modules</div>
+      <div class="module-grid">
+        <div class="module-card mc-teal">
+          <div class="m-num">M01</div>
+          <div class="m-name">POS</div>
+          <div class="m-tech">Offline-capable · SQLite · Barcode · Split payment</div>
+        </div>
+        <div class="module-card mc-teal">
+          <div class="m-num">M02</div>
+          <div class="m-name">Inventory</div>
+          <div class="m-tech">FIFO/FEFO · Serial/Lot · Multi-location · AI reorder</div>
+        </div>
+        <div class="module-card mc-teal">
+          <div class="m-num">M03</div>
+          <div class="m-name">Purchasing</div>
+          <div class="m-tech">RFQ · PO workflow · 3-way match · Supplier portal</div>
+        </div>
+        <div class="module-card mc-teal">
+          <div class="m-num">M04</div>
+          <div class="m-name">Sales & CRM</div>
+          <div class="m-tech">Pipeline · B2B accounts · Leads · Commission</div>
+        </div>
+        <div class="module-card mc-teal">
+          <div class="m-num">M05</div>
+          <div class="m-name">Finance</div>
+          <div class="m-tech">Double-entry GL · AP/AR · Multi-currency · Tax</div>
+        </div>
+        <div class="module-card mc-coral">
+          <div class="m-num">M06</div>
+          <div class="m-name">Lottery</div>
+          <div class="m-tech">Book activation · Reconciliation · Commission · Compliance</div>
+        </div>
+        <div class="module-card mc-coral">
+          <div class="m-num">M07</div>
+          <div class="m-name">Gas Station</div>
+          <div class="m-tech">Pump control · ATG · Wet stock · Fleet cards</div>
+        </div>
+        <div class="module-card mc-coral">
+          <div class="m-num">M08</div>
+          <div class="m-name">Loyalty</div>
+          <div class="m-tech">Points · Tiers · Campaigns · Fuel rewards</div>
+        </div>
+        <div class="module-card mc-coral">
+          <div class="m-num">M09</div>
+          <div class="m-name">Delivery</div>
+          <div class="m-tech">Order aggregation · Driver tracking · POD · Route AI</div>
+        </div>
+        <div class="module-card mc-coral">
+          <div class="m-num">M10</div>
+          <div class="m-name">Email & Comms</div>
+          <div class="m-tech">WildDuck · ZoneMTA · Marketing automation · WhatsApp</div>
+        </div>
+        <div class="module-card mc-amber">
+          <div class="m-num">M11</div>
+          <div class="m-name">Shipping</div>
+          <div class="m-tech">Multi-carrier · Rate shopping · Labels · Returns</div>
+        </div>
+        <div class="module-card mc-amber">
+          <div class="m-num">M12</div>
+          <div class="m-name">Payments</div>
+          <div class="m-tech">Orchestration · Failover · PCI DSS · Chargebacks</div>
+        </div>
+        <div class="module-card mc-amber">
+          <div class="m-num">M13</div>
+          <div class="m-name">HR & Workforce</div>
+          <div class="m-tech">Scheduling · Payroll · Attendance · Compliance</div>
+        </div>
+        <div class="module-card mc-purple">
+          <div class="m-num">M14</div>
+          <div class="m-name">AI Analytics</div>
+          <div class="m-tech">Forecasting · Fraud · Churn · NL queries · Narratives</div>
+        </div>
+        <div class="module-card mc-purple">
+          <div class="m-num">M15</div>
+          <div class="m-name">Sys Admin</div>
+          <div class="m-tech">Tenant config · RBAC · Hardware · Integrations</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Kafka event bus — topic design</div>
+      <div class="topic-grid">
+        <div class="topic-card">
+          <div class="topic-card-head">transactions.*</div>
+          <div class="topic-card-body">Producers: POS, Sales<br>Consumers: Finance, AI, Loyalty, Audit<br>Events: completed, refunded, voided</div>
+        </div>
+        <div class="topic-card">
+          <div class="topic-card-head">inventory.*</div>
+          <div class="topic-card-body">Producers: Inventory, POS, Purchasing<br>Consumers: AI, Notifications, Reporting<br>Events: low_stock, out_of_stock, received</div>
+        </div>
+        <div class="topic-card">
+          <div class="topic-card-head">deliveries.*</div>
+          <div class="topic-card-body">Producers: Delivery service<br>Consumers: Notifications, CRM, Finance<br>Events: assigned, status_changed, delivered</div>
+        </div>
+        <div class="topic-card">
+          <div class="topic-card-head">payments.*</div>
+          <div class="topic-card-body">Producers: Payment orchestrator<br>Consumers: Finance, POS, Notifications<br>Events: succeeded, failed, disputed</div>
+        </div>
+        <div class="topic-card">
+          <div class="topic-card-head">analytics.*</div>
+          <div class="topic-card-body">Producers: All services (aggregated)<br>Consumers: AI Engine, ClickHouse ingest<br>Events: rollup metrics, feature vectors</div>
+        </div>
+        <div class="topic-card">
+          <div class="topic-card-head">alerts.*</div>
+          <div class="topic-card-body">Producers: AI, ATG, POS, Auth<br>Consumers: Notification svc, Email, SMS<br>Events: fraud, cash_variance, tank_low</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Shared services</div>
+      <div class="two-col">
+        <table class="arch-table">
+          <thead><tr><th>Service</th><th>Technology</th><th>Responsibility</th></tr></thead>
+          <tbody>
+            <tr><td>Auth service</td><td><code>Keycloak</code></td><td>OAuth 2.0, OIDC, SAML, JWT, MFA, SSO</td></tr>
+            <tr><td>Workflow engine</td><td><code>Temporal.io</code></td><td>Saga orchestration, approval workflows, retries</td></tr>
+            <tr><td>Notification service</td><td><code>FCM/APNs/Twilio</code></td><td>Push, SMS, WhatsApp, email routing</td></tr>
+            <tr><td>Rate limiter</td><td><code>Redis</code></td><td>Per-tenant, per-route request throttling</td></tr>
+            <tr><td>Audit logger</td><td><code>Postgres + S3</code></td><td>Immutable tamper-evident audit log</td></tr>
+            <tr><td>Feature flags</td><td><code>Unleash</code></td><td>Per-tenant module enable/disable, rollouts</td></tr>
+          </tbody>
+        </table>
+        <div>
+          <div class="sub-section-title" style="margin-top:0">Communication patterns</div>
+          <div class="comp-box mt16">
+            <div class="comp-box-head"><div class="dot" style="background:#FF4500"></div>Async (Kafka) — preferred</div>
+            <div class="comp-box-body"><ul>
+              <li>Cross-module events (transactions, inventory, delivery)</li>
+              <li>Analytics and reporting pipelines</li>
+              <li>Notification dispatch</li>
+              <li>AI feature ingestion</li>
+            </ul></div>
+          </div>
+          <div class="comp-box mt16">
+            <div class="comp-box-head"><div class="dot" style="background:#1D4ED8"></div>Sync (REST/gRPC) — when immediate response needed</div>
+            <div class="comp-box-body"><ul>
+              <li>Auth token validation (gateway → Keycloak)</li>
+              <li>Payment authorization (POS → Payment orchestrator)</li>
+              <li>Saga compensating transactions</li>
+              <li>Customer-facing API responses</li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">02</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 4 — DATA ARCHITECTURE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="data">
+  <div class="sec-header">
+    <div class="sec-num">3</div>
+    <div>
+      <div class="sec-title">Data Architecture</div>
+      <div class="sec-desc">Polyglot persistence — right store for every workload</div>
+    </div>
+  </div>
+  <div class="sec-body">
+    <div class="arch-section">
+      <div class="arch-label">Data store selection matrix</div>
+      <table class="arch-table">
+        <thead>
+          <tr><th>Store</th><th>Type</th><th>Workload</th><th>Modules</th><th>Scale target</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>PostgreSQL</strong></td><td>RDBMS OLTP</td><td>All transactional writes, financial records</td><td>All modules</td><td>50K QPS with read replicas × 2, PgBouncer</td></tr>
+          <tr><td><strong>ClickHouse</strong></td><td>Columnar OLAP</td><td>Analytics queries, AI training data, reports</td><td>AI, Reporting, Finance</td><td>Billions of rows, sub-second aggregations</td></tr>
+          <tr><td><strong>Redis</strong></td><td>In-memory KV</td><td>Sessions, cache, rate limits, pub/sub</td><td>Auth, POS, Gateway</td><td>500K ops/sec, cluster mode</td></tr>
+          <tr><td><strong>Elasticsearch</strong></td><td>Search engine</td><td>Product search, customer lookup, log search</td><td>POS, CRM, Admin</td><td>Full-text across 10M+ products</td></tr>
+          <tr><td><strong>CouchDB</strong></td><td>Document (sync)</td><td>Offline-online sync, CRDT merge</td><td>POS, Inventory</td><td>Bi-directional replication to PouchDB</td></tr>
+          <tr><td><strong>TimescaleDB</strong></td><td>Time-series</td><td>ATG tank readings, sensor data, fuel logs</td><td>Gas Station</td><td>Millions of readings/day, retention policies</td></tr>
+          <tr><td><strong>SQLite (device)</strong></td><td>Embedded</td><td>On-device POS cache, offline transaction queue</td><td>POS</td><td>Local only, syncs via PouchDB</td></tr>
+          <tr><td><strong>S3 / GCS</strong></td><td>Object storage</td><td>Receipts, POD photos, invoices, employee docs</td><td>All modules</td><td>Unlimited, cross-region replicated</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Data flow & replication pipeline</div>
+      <div class="flow-row">
+        <div><div class="flow-box">PostgreSQL (write)</div><div class="flow-label">Primary OLTP</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box alt">Kafka CDC</div><div class="flow-label">Debezium connector</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box">ClickHouse</div><div class="flow-label">Analytics sync</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box alt">AI feature store</div><div class="flow-label">Pre-computed features</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box">ML models</div><div class="flow-label">Weekly retrain</div></div>
+      </div>
+      <div class="flow-row" style="margin-top:8px">
+        <div><div class="flow-box light">PouchDB (device)</div><div class="flow-label">Offline writes</div></div>
+        <div class="flow-arrow">⇄</div>
+        <div><div class="flow-box alt">CouchDB sync</div><div class="flow-label">On reconnect</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box">CRDT engine</div><div class="flow-label">Conflict resolution</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box ok">PostgreSQL (merge)</div><div class="flow-label">Final state</div></div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Multi-tenancy & data isolation</div>
+      <div class="two-col">
+        <table class="arch-table">
+          <thead><tr><th>Mechanism</th><th>Implementation</th></tr></thead>
+          <tbody>
+            <tr><td>Row-Level Security (RLS)</td><td>PostgreSQL RLS policies enforce <code>tenant_id</code> on every query</td></tr>
+            <tr><td>Tenant ID injection</td><td>Middleware injects <code>SET app.current_tenant</code> from JWT on every connection</td></tr>
+            <tr><td>Connection pooling</td><td>PgBouncer in transaction mode; tenant isolation maintained via RLS not schema</td></tr>
+            <tr><td>Analytics isolation</td><td>ClickHouse partitioned by <code>tenant_id</code>; query-time filter enforced by API layer</td></tr>
+            <tr><td>Search isolation</td><td>Elasticsearch index-per-tenant for large tenants; shared index with filter for small</td></tr>
+            <tr><td>File isolation</td><td>S3 prefix: <code>/{tenant_id}/{module}/{file}</code>; bucket policies enforce prefix</td></tr>
+            <tr><td>Cache isolation</td><td>Redis key prefix: <code>t:{tenant_id}:{key}</code></td></tr>
+            <tr><td>AI isolation</td><td>Zero cross-tenant data in model training. Models per-tenant for Enterprise tier</td></tr>
+          </tbody>
+        </table>
+        <div>
+          <div class="sub-section-title" style="margin-top:0">Backup & recovery</div>
+          <table class="arch-table">
+            <thead><tr><th>Tier</th><th>RTO</th><th>RPO</th><th>Backup freq</th></tr></thead>
+            <tbody>
+              <tr><td>Starter</td><td>4 hours</td><td>1 hour</td><td>Daily</td></tr>
+              <tr><td>Growth</td><td>2 hours</td><td>30 min</td><td>6-hourly</td></tr>
+              <tr><td>Business</td><td>1 hour</td><td>15 min</td><td>Hourly</td></tr>
+              <tr><td>Enterprise</td><td>30 min</td><td>5 min</td><td>Continuous WAL</td></tr>
+            </tbody>
+          </table>
+          <div class="note-box mt16">
+            <strong>Encryption</strong>
+            All backups encrypted AES-256. Cross-region replication enabled from Growth tier. Backup restoration tested monthly. Point-in-time recovery (PITR) available for Business and Enterprise tiers via PostgreSQL WAL archiving.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">03</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 5 — DEVOPS ARCHITECTURE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="devops">
+  <div class="sec-header">
+    <div class="sec-num">4</div>
+    <div>
+      <div class="sec-title">DevOps Architecture</div>
+      <div class="sec-desc">CI/CD pipeline, GitOps, testing strategy, and observability</div>
+    </div>
+  </div>
+  <div class="sec-body">
+
+    <div class="arch-section">
+      <div class="arch-label">CI/CD pipeline</div>
+      <div class="flow-row">
+        <div><div class="flow-box light">Developer push</div><div class="flow-label">Feature branch</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box">GitHub PR</div><div class="flow-label">Code review</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box alt">GitHub Actions CI</div><div class="flow-label">Automated checks</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box">Docker build</div><div class="flow-label">Multi-stage image</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box ok">ECR / GCR registry</div><div class="flow-label">Image push</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box alt">ArgoCD GitOps</div><div class="flow-label">Helm chart sync</div></div>
+        <div class="flow-arrow">→</div>
+        <div><div class="flow-box">K8s deploy</div><div class="flow-label">Blue/green</div></div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">CI pipeline — GitHub Actions stages</div>
+      <table class="arch-table">
+        <thead><tr><th>Stage</th><th>Tools</th><th>What runs</th><th>Fail policy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Lint & format</strong></td><td><code>ESLint</code> <code>Prettier</code></td><td>Code style, import order, type checks (tsc --noEmit)</td><td>Block merge</td></tr>
+          <tr><td><strong>Unit tests</strong></td><td><code>Jest</code> <code>Vitest</code></td><td>All module unit tests, coverage threshold 80%</td><td>Block merge</td></tr>
+          <tr><td><strong>Integration tests</strong></td><td><code>Jest</code> + docker-compose</td><td>DB queries, Kafka events, Redis ops with real services</td><td>Block merge</td></tr>
+          <tr><td><strong>Security scan</strong></td><td><code>Snyk</code> <code>Trivy</code></td><td>Dependency CVE scan, Docker image scan</td><td>Block on HIGH/CRITICAL</td></tr>
+          <tr><td><strong>Docker build</strong></td><td><code>Docker BuildKit</code></td><td>Multi-stage image, layer caching, SBOM generation</td><td>Block on failure</td></tr>
+          <tr><td><strong>E2E tests</strong></td><td><code>Playwright</code></td><td>Critical user flows: checkout, refund, inventory receive</td><td>Block on staging deploy</td></tr>
+          <tr><td><strong>Load test</strong></td><td><code>k6</code></td><td>500 VUs, 30min, all critical API paths. Regression if p95 &gt; +20%</td><td>Alert on regression</td></tr>
+          <tr><td><strong>Deploy staging</strong></td><td><code>ArgoCD</code></td><td>Auto-deploy on main branch merge, Helm chart update</td><td>Rollback on health check fail</td></tr>
+          <tr><td><strong>Deploy production</strong></td><td><code>ArgoCD</code> + approval</td><td>Manual approval gate → blue/green deploy → smoke tests</td><td>Auto-rollback</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Observability stack</div>
+      <div class="three-col">
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#7C3AED"></div>Metrics (Prometheus + Grafana)</div>
+          <div class="comp-box-body"><ul>
+            <li>RED metrics per service (Rate, Errors, Duration)</li>
+            <li>Business KPIs (TPS, checkout latency, payment auth rate)</li>
+            <li>Infrastructure (CPU, memory, pod restarts, DB connections)</li>
+            <li>Custom dashboards per role (Ops, Business, Finance)</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#0D9488"></div>Tracing (OpenTelemetry + Datadog)</div>
+          <div class="comp-box-body"><ul>
+            <li>Distributed traces across all 15 microservices</li>
+            <li>Trace propagation via W3C TraceContext headers</li>
+            <li>Span attributes: tenant_id, store_id, module, user_role</li>
+            <li>Sampling: 100% errors, 10% normal traffic</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#D97706"></div>Logging (Loki / Datadog Logs)</div>
+          <div class="comp-box-body"><ul>
+            <li>Structured JSON logs from all services</li>
+            <li>Log levels: DEBUG (dev), INFO (staging), WARN/ERROR (prod)</li>
+            <li>Sensitive data redacted at log-write time (PII, card data)</li>
+            <li>7-day hot storage, 90-day cold S3 archive</li>
+          </ul></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Deployment strategies</div>
+      <table class="arch-table">
+        <thead><tr><th>Strategy</th><th>Used for</th><th>Mechanism</th><th>Rollback time</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Blue/Green</strong></td><td>All production deployments</td><td>Two identical environments; traffic switch via load balancer; old env kept for 30min</td><td>&lt; 30 seconds</td></tr>
+          <tr><td><strong>Feature flags</strong></td><td>New feature rollout</td><td>Unleash flags per tenant/tier; dark launch, canary rollout percentages</td><td>Toggle off in &lt; 1s</td></tr>
+          <tr><td><strong>Database migrations</strong></td><td>Schema changes</td><td>Backward-compatible migrations only (expand/contract). Flyway managed.</td><td>N/A — expand first</td></tr>
+          <tr><td><strong>Chaos engineering</strong></td><td>Resilience verification</td><td>Monthly: random pod kill, network partition, DB failover in staging. Chaos Monkey.</td><td>Test readiness</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">On-call & incident management</div>
+      <div class="two-col">
+        <table class="arch-table">
+          <thead><tr><th>Severity</th><th>Definition</th><th>Response SLA</th><th>Escalation</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge" style="background:#FEE2E2;color:#991B1B">P0 Critical</span></td><td>Full outage, data loss risk</td><td>15 min</td><td>Immediate CTO + engineering lead</td></tr>
+            <tr><td><span class="badge" style="background:#FEF3C7;color:#92400E">P1 High</span></td><td>Major feature unavailable</td><td>1 hour</td><td>On-call engineer + manager</td></tr>
+            <tr><td><span class="badge" style="background:#DBEAFE;color:#1E40AF">P2 Medium</span></td><td>Degraded performance</td><td>4 hours</td><td>On-call engineer</td></tr>
+            <tr><td><span class="badge" style="background:#F3F4F6;color:#374151">P3 Low</span></td><td>Minor issue, workaround exists</td><td>Next business day</td><td>Ticket queue</td></tr>
+          </tbody>
+        </table>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#FF4500"></div>Alerting rules (PagerDuty)</div>
+          <div class="comp-box-body"><ul>
+            <li>Error rate &gt; 1% for any service → P1</li>
+            <li>p95 latency &gt; 2× baseline for 5min → P2</li>
+            <li>Database primary fail → P0 immediate</li>
+            <li>Payment auth rate drops &gt; 5% → P1</li>
+            <li>Disk usage &gt; 85% → P2 warning</li>
+            <li>Failed login spike (10× normal) → P1 security</li>
+            <li>ATG leak alert → P0 with SMS to store manager</li>
+          </ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">04</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 6 — INFRASTRUCTURE ARCHITECTURE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="infra">
+  <div class="sec-header">
+    <div class="sec-num">5</div>
+    <div>
+      <div class="sec-title">Infrastructure Architecture</div>
+      <div class="sec-desc">Kubernetes, multi-region, environments, and disaster recovery</div>
+    </div>
+  </div>
+  <div class="sec-body">
+
+    <div class="arch-section">
+      <div class="arch-label">Kubernetes cluster topology</div>
+      <table class="arch-table">
+        <thead><tr><th>Node pool</th><th>Instance type</th><th>Min nodes</th><th>Max nodes (HPA)</th><th>Workloads</th></tr></thead>
+        <tbody>
+          <tr><td><strong>App pool</strong></td><td>c5.2xlarge / n2-standard-8</td><td>3</td><td>50</td><td>All 15 microservices</td></tr>
+          <tr><td><strong>Data pool</strong></td><td>r5.4xlarge / n2-highmem-16</td><td>3</td><td>20</td><td>PostgreSQL, Redis, ClickHouse, Elasticsearch</td></tr>
+          <tr><td><strong>GPU pool</strong></td><td>p3.2xlarge / a2-highgpu-1g</td><td>1</td><td>8</td><td>AI/ML model serving (Python FastAPI)</td></tr>
+          <tr><td><strong>Kafka pool</strong></td><td>m5.2xlarge / n2-standard-8</td><td>3</td><td>12</td><td>Apache Kafka brokers (3-broker min)</td></tr>
+          <tr><td><strong>Email pool</strong></td><td>c5.xlarge / n2-standard-4</td><td>2</td><td>6</td><td>WildDuck, ZoneMTA, Haraka</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Deployment environments</div>
+      <div class="infra-env">
+        <div class="env-card">
+          <div class="env-card-head" style="background:#374151">Development</div>
+          <div class="env-card-body">
+            <p><strong>Setup:</strong> Docker Compose</p>
+            <p><strong>Data:</strong> Seeded test data for all modules</p>
+            <p><strong>Deploys:</strong> Local, hot-reload</p>
+            <p><strong>External:</strong> Mocked (Stripe, Twilio)</p>
+          </div>
+        </div>
+        <div class="env-card">
+          <div class="env-card-head" style="background:#7C3AED">Staging</div>
+          <div class="env-card-body">
+            <p><strong>Setup:</strong> Full K8s, 1/4 prod scale</p>
+            <p><strong>Data:</strong> Anonymised prod copy</p>
+            <p><strong>Deploys:</strong> Auto on main merge</p>
+            <p><strong>External:</strong> Sandbox/test mode</p>
+          </div>
+        </div>
+        <div class="env-card">
+          <div class="env-card-head" style="background:#1B2A4A">Production</div>
+          <div class="env-card-body">
+            <p><strong>Setup:</strong> Multi-region K8s</p>
+            <p><strong>Data:</strong> Live, RLS enforced</p>
+            <p><strong>Deploys:</strong> Manual gate + blue/green</p>
+            <p><strong>External:</strong> Live APIs, real payments</p>
+          </div>
+        </div>
+        <div class="env-card">
+          <div class="env-card-head" style="background:#DC2626">DR (Hot standby)</div>
+          <div class="env-card-body">
+            <p><strong>Setup:</strong> Secondary region K8s</p>
+            <p><strong>Data:</strong> Sync replication, &lt;5min lag</p>
+            <p><strong>Deploys:</strong> Passive — activates on P0</p>
+            <p><strong>Failover:</strong> Route53 health check</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Infrastructure-as-code</div>
+      <div class="two-col">
+        <table class="arch-table">
+          <thead><tr><th>Tool</th><th>What it manages</th></tr></thead>
+          <tbody>
+            <tr><td><code>Terraform</code></td><td>Cloud resources: VPC, subnets, RDS, S3, IAM, EKS cluster provisioning</td></tr>
+            <tr><td><code>Helm</code></td><td>Kubernetes application packaging and versioned releases per service</td></tr>
+            <tr><td><code>ArgoCD</code></td><td>GitOps continuous delivery — K8s state declared in Git, auto-synced</td></tr>
+            <tr><td><code>Ansible</code></td><td>VM configuration, POS hardware setup scripts, ATG device provisioning</td></tr>
+            <tr><td><code>Vault</code></td><td>Secret injection into pods at runtime; dynamic DB credentials; auto-rotation</td></tr>
+          </tbody>
+        </table>
+        <div>
+          <div class="sub-section-title" style="margin-top:0">Networking</div>
+          <div class="comp-box">
+            <div class="comp-box-head"><div class="dot" style="background:#1D4ED8"></div>Network architecture</div>
+            <div class="comp-box-body"><ul>
+              <li>VPC with public (load balancers) and private (services, DB) subnets</li>
+              <li>Service mesh (Istio) for mTLS between services</li>
+              <li>No direct pod-to-pod across namespaces without NetworkPolicy</li>
+              <li>NAT Gateway for outbound from private subnets</li>
+              <li>PrivateLink for DB and secrets (no public internet exposure)</li>
+              <li>VPN / Direct Connect for on-premise hardware (POS, ATG, pumps)</li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">05</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 7 — SECURITY ARCHITECTURE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="security">
+  <div class="sec-header">
+    <div class="sec-num">6</div>
+    <div>
+      <div class="sec-title">Security Architecture</div>
+      <div class="sec-desc">Defense-in-depth — edge to database</div>
+    </div>
+  </div>
+  <div class="sec-body">
+    <div class="arch-section">
+      <div class="arch-label">Security layers (outer → inner)</div>
+      <div class="sec-layers">
+        <div class="sec-layer">
+          <div class="sec-layer-head" style="background:#1D4ED8"><span>Layer 1 — Edge</span><span style="font-size:10px;font-weight:400">Cloudflare / CloudFront</span></div>
+          <div class="sec-layer-body">DDoS protection (L3/L4/L7) · CDN WAF with OWASP ruleset · TLS 1.3 only, HSTS enforced · Bot detection · Rate limiting at edge (1K req/min standard, 10K enterprise)</div>
+        </div>
+        <div class="sec-layer">
+          <div class="sec-layer-head" style="background:#4F46E5"><span>Layer 2 — Identity & Auth</span><span style="font-size:10px;font-weight:400">Keycloak</span></div>
+          <div class="sec-layer-body">OAuth 2.0 + OIDC + SAML · MFA mandatory for financial/admin roles (TOTP + SMS OTP) · JWT tokens (8h web, 30d mobile) · Refresh token rotation on every use · Concurrent session control · Geo-fencing (optional) · IP allowlisting for Accountant/Auditor · 5-attempt lockout → 15min freeze</div>
+        </div>
+        <div class="sec-layer">
+          <div class="sec-layer-head" style="background:#6D28D9"><span>Layer 3 — API Gateway</span><span style="font-size:10px;font-weight:400">Kong</span></div>
+          <div class="sec-layer-body">JWT validation on every request · Rate limiting per tenant and per route · Request size limits · SQL injection prevention via input sanitization · API key management (scoped keys for POS/webhook integrations)</div>
+        </div>
+        <div class="sec-layer">
+          <div class="sec-layer-head" style="background:#0D9488"><span>Layer 4 — Application</span><span style="font-size:10px;font-weight:400">RBAC + ABAC</span></div>
+          <div class="sec-layer-body">15-level RBAC hierarchy · Permission check on every API handler · Parameterised queries (ORM-enforced, zero raw SQL) · CSRF tokens on all state-changing requests · CSP headers · XSS prevention via output encoding · No PII in logs (redacted at write time)</div>
+        </div>
+        <div class="sec-layer">
+          <div class="sec-layer-head" style="background:#1B2A4A"><span>Layer 5 — Data</span><span style="font-size:10px;font-weight:400">Encryption + RLS</span></div>
+          <div class="sec-layer-body">AES-256 at rest for all stores incl. SQLite offline cache · TLS 1.3 in transit · PCI DSS tokenisation (no raw card data stored) · P2PE terminal support · Row-Level Security per tenant_id · Vault-managed dynamic DB credentials · Annual pen test + daily vulnerability scan</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Compliance & audit</div>
+      <div class="three-col">
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#16A34A"></div>Certifications</div>
+          <div class="comp-box-body"><ul>
+            <li>PCI DSS SAQ-A/SAQ-B (card payments)</li>
+            <li>GDPR / DPDPA compliance (data minimisation, erasure)</li>
+            <li>ISO 27001 roadmap (Enterprise tier)</li>
+            <li>SOC 2 Type II roadmap</li>
+            <li>GSTN integration compliance (India)</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#FF4500"></div>Audit log</div>
+          <div class="comp-box-body"><ul>
+            <li>Immutable, tamper-evident log of every action</li>
+            <li>Fields: user_id, tenant_id, action, resource_id, old_val, new_val, IP, device, timestamp</li>
+            <li>Stored in append-only Postgres + S3 archive</li>
+            <li>Searchable by Auditor role (read-only)</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#D97706"></div>Secret management</div>
+          <div class="comp-box-body"><ul>
+            <li>HashiCorp Vault for all secrets</li>
+            <li>Dynamic DB credentials (auto-rotated per pod)</li>
+            <li>AWS Secrets Manager for cloud-native services</li>
+            <li>Zero hardcoded credentials anywhere in codebase</li>
+            <li>Automated secret rotation (30-day cycle)</li>
+          </ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">06</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 8 — OFFLINE-FIRST ARCHITECTURE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="offline">
+  <div class="sec-header">
+    <div class="sec-num">7</div>
+    <div>
+      <div class="sec-title">Offline-First Architecture</div>
+      <div class="sec-desc">CRDT sync, conflict resolution, and module-level offline support</div>
+    </div>
+  </div>
+  <div class="sec-body">
+    <div class="arch-section">
+      <div class="arch-label">Sync flow — POS device offline → reconnect</div>
+      <div class="offline-states">
+        <div class="offline-device">
+          <div class="offline-head" style="background:#1B2A4A">POS Device (offline)</div>
+          <div class="offline-body">
+            <div class="offline-item"><span>SQLite</span><span class="chip chip-teal">Product cache</span></div>
+            <div class="offline-item"><span>PouchDB queue</span><span class="chip chip-amber">Pending transactions</span></div>
+            <div class="offline-item"><span>Cash payments</span><span class="chip chip-green">Full support ✓</span></div>
+            <div class="offline-item"><span>Card payments</span><span class="chip chip-coral">Pre-auth queue</span></div>
+            <div class="offline-item"><span>Loyalty points</span><span class="chip chip-amber">Queued for sync</span></div>
+            <div class="offline-item"><span>Receipts</span><span class="chip chip-amber">Stored locally</span></div>
+            <div class="offline-item"><span>Inventory</span><span class="chip chip-teal">Read from cache</span></div>
+          </div>
+        </div>
+        <div class="offline-arrow">
+          <div class="big-arrow">⇄</div>
+          <div>On reconnect</div>
+          <div style="margin-top:8px;text-align:center">
+            <div style="background:#DCFCE7;color:#15803D;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:4px">1. Detect</div>
+            <div style="background:#DBEAFE;color:#1E40AF;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:4px">2. Push queue</div>
+            <div style="background:#EDE9FE;color:#6D28D9;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:4px">3. CRDT merge</div>
+            <div style="background:#FEF3C7;color:#92400E;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:4px">4. Pull delta</div>
+            <div style="background:#FFF0EB;color:#C43A00;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:600">5. Resolve</div>
+          </div>
+        </div>
+        <div class="offline-cloud">
+          <div class="offline-head" style="background:#0D9488">Cloud backend (always on)</div>
+          <div class="offline-body">
+            <div class="offline-item"><span>CouchDB sync API</span><span class="chip chip-teal">Bi-directional</span></div>
+            <div class="offline-item"><span>CRDT engine</span><span class="chip chip-purple">Conflict resolve</span></div>
+            <div class="offline-item"><span>Inventory merge</span><span class="chip chip-amber">Delta apply</span></div>
+            <div class="offline-item"><span>Oversold detection</span><span class="chip chip-coral">Manager alert</span></div>
+            <div class="offline-item"><span>Payment auth flush</span><span class="chip chip-teal">Queued cards</span></div>
+            <div class="offline-item"><span>Receipt delivery</span><span class="chip chip-green">Email/SMS send</span></div>
+            <div class="offline-item"><span>Audit log</span><span class="chip chip-navy">All tx logged</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Offline capability by module</div>
+      <table class="arch-table">
+        <thead><tr><th>Module</th><th>Offline level</th><th>Data store</th><th>Sync strategy</th><th>Conflict handling</th></tr></thead>
+        <tbody>
+          <tr><td>POS — transactions</td><td><span class="badge chip-green">Full</span></td><td>SQLite + PouchDB</td><td>CRDT event log, merge on reconnect</td><td>Last-write-wins with timestamp; manager review for stock conflicts</td></tr>
+          <tr><td>POS — cash payments</td><td><span class="badge chip-green">Full</span></td><td>SQLite</td><td>Local record, reconcile on reconnect</td><td>N/A — cash is deterministic</td></tr>
+          <tr><td>POS — card payments</td><td><span class="badge chip-amber">Partial</span></td><td>PouchDB queue</td><td>Pre-auth if possible; else queue for online</td><td>Process on reconnect; notify cashier</td></tr>
+          <tr><td>Inventory (read)</td><td><span class="badge chip-teal">Read</span></td><td>SQLite cache</td><td>Delta sync on reconnect</td><td>Server wins on stock level</td></tr>
+          <tr><td>Loyalty points</td><td><span class="badge chip-amber">Queued</span></td><td>PouchDB</td><td>Queue and apply on reconnect</td><td>Points applied in order; balance reconciled</td></tr>
+          <tr><td>Lottery ticket sales</td><td><span class="badge chip-amber">Queued</span></td><td>SQLite</td><td>Sync and reconcile</td><td>Book reconciliation flags discrepancies</td></tr>
+          <tr><td>Gas station / pumps</td><td><span class="badge chip-green">Full</span></td><td>Local (pump controller)</td><td>Fuel sales recorded locally; sync on reconnect</td><td>Wet stock reconciliation on sync</td></tr>
+          <tr><td>Reporting</td><td><span class="badge chip-coral">None (cached)</span></td><td>Last-cached views</td><td>Auto-refresh on reconnect</td><td>N/A</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">07</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 9 — INTEGRATION ARCHITECTURE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="integration">
+  <div class="sec-header">
+    <div class="sec-num">8</div>
+    <div>
+      <div class="sec-title">Integration Architecture</div>
+      <div class="sec-desc">All external systems, protocols, and integration patterns</div>
+    </div>
+  </div>
+  <div class="sec-body">
+    <div class="arch-section">
+      <div class="arch-label">Integration catalogue</div>
+      <table class="arch-table">
+        <thead><tr><th>Category</th><th>Systems</th><th>Protocol</th><th>Direction</th><th>Module</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Payment gateways</strong></td><td>Stripe, Square, Razorpay, PayU, Adyen, Worldpay, Braintree, Authorize.net</td><td>REST API / SDK</td><td>Outbound</td><td>Payments (M12)</td></tr>
+          <tr><td><strong>Fleet card processors</strong></td><td>WEX, Voyager, FleetCor, Comdata</td><td>ISO 8583 / REST</td><td>Outbound</td><td>Gas Station (M07), Payments</td></tr>
+          <tr><td><strong>Delivery platforms</strong></td><td>DoorDash, Uber Eats, Instacart, Grubhub, Zomato, Swiggy</td><td>REST / Webhooks</td><td>Inbound + Outbound</td><td>Delivery (M09)</td></tr>
+          <tr><td><strong>Shipping carriers</strong></td><td>UPS, FedEx, USPS, DHL, Shiprocket, Delhivery, Blue Dart</td><td>REST API</td><td>Outbound</td><td>Shipping (M11)</td></tr>
+          <tr><td><strong>Fuel / ATG controllers</strong></td><td>Veeder-Root, OPW, Incon</td><td>Serial / TCP-IP (ATG protocol)</td><td>Inbound</td><td>Gas Station (M07)</td></tr>
+          <tr><td><strong>Pump controllers</strong></td><td>Gilbarco Encore, Wayne Helix, Tokheim</td><td>Proprietary API / TLS</td><td>Bidirectional</td><td>Gas Station (M07)</td></tr>
+          <tr><td><strong>Lottery terminals</strong></td><td>IGT, Scientific Games, Everi</td><td>Proprietary / REST</td><td>Bidirectional</td><td>Lottery (M06)</td></tr>
+          <tr><td><strong>Accounting systems</strong></td><td>QuickBooks, Xero, Tally, Zoho Books</td><td>REST API / CSV export</td><td>Outbound</td><td>Finance (M05)</td></tr>
+          <tr><td><strong>E-commerce platforms</strong></td><td>Shopify, WooCommerce, Magento, BigCommerce</td><td>REST / Webhooks</td><td>Bidirectional</td><td>Sales (M04), Inventory</td></tr>
+          <tr><td><strong>Identity / SSO</strong></td><td>Google, Microsoft Azure AD, Keycloak, Okta</td><td>OAuth 2.0 / OIDC / SAML</td><td>Inbound</td><td>Auth (Keycloak)</td></tr>
+          <tr><td><strong>Comm & messaging</strong></td><td>Twilio, MSG91, Exotel, WhatsApp Business API</td><td>REST API</td><td>Outbound</td><td>Email & Comms (M10)</td></tr>
+          <tr><td><strong>HR / Payroll</strong></td><td>ADP, Paychex, Gusto, Keka (India)</td><td>REST API / CSV</td><td>Outbound</td><td>HR (M13)</td></tr>
+          <tr><td><strong>Tax / Govt</strong></td><td>GSTN (India), IRS e-file (US), state tax portals</td><td>API / XML</td><td>Outbound</td><td>Finance (M05)</td></tr>
+          <tr><td><strong>Business intelligence</strong></td><td>Power BI, Tableau, Metabase</td><td>JDBC / REST (read-only)</td><td>Outbound</td><td>AI & Reporting (M14)</td></tr>
+          <tr><td><strong>ERP bridges</strong></td><td>SAP (RFC/BAPI), Odoo XML-RPC</td><td>RFC / XML-RPC</td><td>Bidirectional</td><td>All (Enterprise tier)</td></tr>
+          <tr><td><strong>Email infrastructure</strong></td><td>WildDuck (IMAP), ZoneMTA (SMTP relay), Haraka</td><td>SMTP / REST</td><td>Outbound</td><td>Email & Comms (M10)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Integration patterns</div>
+      <div class="two-col">
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#7C3AED"></div>Webhook design (outbound)</div>
+          <div class="comp-box-body"><ul>
+            <li>HMAC-SHA256 signed payloads (X-Platform-Signature header)</li>
+            <li>Retry policy: 3 attempts at 1min → 5min → 30min</li>
+            <li>Idempotency key on every event (UUID)</li>
+            <li>Events: transaction.completed, inventory.low_stock, delivery.status_changed, payment.failed, fuel.tank_low</li>
+            <li>Webhook health dashboard for each endpoint</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#FF4500"></div>API key management</div>
+          <div class="comp-box-body"><ul>
+            <li>API keys scoped to specific endpoints (not full access)</li>
+            <li>Hash of UUID stored; original shown once on creation</li>
+            <li>Per-key rate limits configured in Kong</li>
+            <li>Key rotation without downtime (grace period on old key)</li>
+            <li>Keys attributed to integration name + creation timestamp in audit log</li>
+          </ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">08</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 10 — AI ENGINE ARCHITECTURE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="ai">
+  <div class="sec-header">
+    <div class="sec-num">9</div>
+    <div>
+      <div class="sec-title">AI Analytics Engine Architecture</div>
+      <div class="sec-desc">Hybrid ML + LLM system with governance and explainability</div>
+    </div>
+  </div>
+  <div class="sec-body">
+    <div class="arch-section">
+      <div class="arch-label">AI model registry</div>
+      <table class="arch-table">
+        <thead><tr><th>AI Feature</th><th>Model type</th><th>Training data</th><th>Update freq</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Demand forecasting</strong></td><td>LightGBM + LSTM (seasonality)</td><td>24-month POS history, weather API, events</td><td>Weekly retrain</td><td>Forecasted units/SKU/day — confidence interval + top 3 factors</td></tr>
+          <tr><td><strong>Smart reorder</strong></td><td>Rule-based + ML override</td><td>POS history, lead times, supplier performance</td><td>Daily recalculation</td><td>PO draft auto-created (days-of-stock, last order comparison)</td></tr>
+          <tr><td><strong>Fraud detection</strong></td><td>Isolation Forest + rule engine</td><td>Transaction patterns (time, amount, voids, discounts)</td><td>Real-time; monthly retrain</td><td>Alert — suspicious transaction + signals listed (e.g. "3 voids in 10min")</td></tr>
+          <tr><td><strong>Customer churn</strong></td><td>Logistic Regression + RFM scoring</td><td>Purchase history, visit frequency, loyalty engagement</td><td>Weekly scoring run</td><td>"At Risk" flag; auto-trigger win-back campaign</td></tr>
+          <tr><td><strong>Price optimisation</strong></td><td>Demand elasticity (regression)</td><td>Historical sales at different price points, competitor feed</td><td>Weekly</td><td>Price band recommendation with margin impact estimate</td></tr>
+          <tr><td><strong>Personalisations</strong></td><td>Collaborative filtering</td><td>Individual purchase history, category preferences</td><td>Daily refresh</td><td>Campaign builder pre-populated with targeted offers</td></tr>
+          <tr><td><strong>Basket analysis</strong></td><td>Apriori / FP-Growth</td><td>6+ months of transaction line items</td><td>Monthly rule refresh</td><td>Association rules: support, confidence, lift metrics</td></tr>
+          <tr><td><strong>NL query engine</strong></td><td>GPT-4o / Claude API (LLM)</td><td>Platform schema + real-time query layer</td><td>Real-time per query</td><td>Generated SQL + result table + plain English summary + SQL shown</td></tr>
+          <tr><td><strong>Automated narratives</strong></td><td>LLM + structured templates</td><td>Weekly metrics across all modules</td><td>Weekly auto-push</td><td>Plain language digest for Owner/Manager — factual, template-constrained</td></tr>
+          <tr><td><strong>Staff scheduling AI</strong></td><td>Time-series + regression</td><td>Hourly transaction counts, staff levels, day-of-week</td><td>Weekly forecast</td><td>Recommended staffing levels per hour per store</td></tr>
+          <tr><td><strong>Cash flow forecast</strong></td><td>ARIMA + business rules</td><td>Daily cash receipts, AP schedule, payroll, recurring costs</td><td>Daily</td><td>30/60/90-day cash position chart with low-cash alerts</td></tr>
+          <tr><td><strong>Fuel price optimisation</strong></td><td>Competitor price feed + margin model</td><td>Competitor prices (web scrape / feed), cost of fuel</td><td>Real-time</td><td>Pump price adjustment suggestion within pre-approved margin range</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">AI governance & trust framework</div>
+      <div class="three-col">
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#16A34A"></div>Transparency rules</div>
+          <div class="comp-box-body"><ul>
+            <li>All outputs labeled "AI suggestion" — never presented as system rule</li>
+            <li>Every auto-action logged with model version, confidence score, features used</li>
+            <li>SQL shown alongside NL query results (user can verify)</li>
+            <li>Explainability required on all customer-facing outputs</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#D97706"></div>Data governance</div>
+          <div class="comp-box-body"><ul>
+            <li>Zero cross-tenant data in training — models trained on own tenant data only</li>
+            <li>No PII in model feature vectors</li>
+            <li>Bias monitoring: fraud + churn models audited quarterly for demographic/time bias</li>
+            <li>Users rate suggestions (👍/👎) — feedback fed to retraining pipeline</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head"><div class="dot" style="background:#7C3AED"></div>Output modes</div>
+          <div class="comp-box-body"><ul>
+            <li><strong>Alert</strong> — immediate attention, anomaly detected</li>
+            <li><strong>Suggestion</strong> — human confirms before action taken</li>
+            <li><strong>Auto-action</strong> — low-risk reversible only (e.g. PO draft, not send)</li>
+            <li><strong>Insight</strong> — informational, no action required</li>
+          </ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">09</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 11 — PROJECT ARCHITECTURE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="project">
+  <div class="sec-header">
+    <div class="sec-num">10</div>
+    <div>
+      <div class="sec-title">Project Architecture</div>
+      <div class="sec-desc">Codebase structure, monorepo layout, and team topology</div>
+    </div>
+  </div>
+  <div class="sec-body">
+    <div class="arch-section">
+      <div class="arch-label">Monorepo structure (Turborepo)</div>
+      <div class="two-col">
+        <div>
+          <pre style="background:var(--navy);color:#C0C8D8;padding:16px;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:10px;line-height:1.7;overflow:auto">diigoo-erp/
+├── apps/
+│   ├── web/              # Next.js manager web app
+│   ├── pos/              # React PWA (POS terminal)
+│   ├── mobile/           # React Native (iOS + Android)
+│   ├── driver/           # React Native driver app
+│   └── customer-app/     # React Native loyalty app
+├── services/
+│   ├── pos-service/      # M01 POS microservice
+│   ├── inventory-service/ # M02
+│   ├── purchase-service/ # M03
+│   ├── sales-service/    # M04 + CRM
+│   ├── finance-service/  # M05
+│   ├── lottery-service/  # M06
+│   ├── fuel-service/     # M07 Gas station
+│   ├── loyalty-service/  # M08
+│   ├── delivery-service/ # M09
+│   ├── comms-service/    # M10 Email + SMS
+│   ├── shipping-service/ # M11
+│   ├── payment-service/  # M12 Orchestrator
+│   ├── hr-service/       # M13
+│   ├── ai-service/       # M14 (Python FastAPI)
+│   └── admin-service/    # M15
+├── packages/
+│   ├── ui/               # Shared component library (Radix)
+│   ├── db/               # Prisma schema + migrations
+│   ├── types/            # Shared TypeScript types
+│   ├── auth/             # Keycloak client wrapper
+│   ├── kafka/            # Kafka producer/consumer helpers
+│   └── config/           # Shared config, env validation
+├── infra/
+│   ├── terraform/        # Cloud resource provisioning
+│   ├── helm/             # K8s Helm charts per service
+│   ├── argocd/           # ArgoCD app definitions
+│   └── ansible/          # Hardware/VM provisioning
+└── tools/
+    ├── scripts/          # DB seed, migration helpers
+    ├── k6/               # Load test scripts per module
+    └── docs/             # OpenAPI specs, ADRs</pre>
+        </div>
+        <div>
+          <div class="sub-section-title" style="margin-top:0">Tech stack by layer</div>
+          <table class="arch-table">
+            <thead><tr><th>Layer</th><th>Technology</th></tr></thead>
+            <tbody>
+              <tr><td>Frontend (web)</td><td>Next.js 14, TypeScript, Tailwind CSS, Radix UI, Zustand</td></tr>
+              <tr><td>Frontend (mobile)</td><td>React Native (Expo), TypeScript</td></tr>
+              <tr><td>Frontend (POS)</td><td>React PWA, PouchDB, SQLite (WASM), Service Worker</td></tr>
+              <tr><td>API services</td><td>Node.js 20, TypeScript, Fastify, Prisma ORM</td></tr>
+              <tr><td>AI services</td><td>Python 3.11, FastAPI, LightGBM, TensorFlow, Scikit-learn</td></tr>
+              <tr><td>Database ORM</td><td>Prisma (Postgres), Mongoose (not used — Prisma only)</td></tr>
+              <tr><td>Auth</td><td>Keycloak 24, OAuth 2.0, OIDC, SAML</td></tr>
+              <tr><td>Messaging</td><td>Apache Kafka 3.x (confluent-kafka-js client)</td></tr>
+              <tr><td>Caching</td><td>Redis 7.x (ioredis client)</td></tr>
+              <tr><td>Testing</td><td>Jest, Vitest, Playwright, Supertest, k6</td></tr>
+              <tr><td>Monorepo</td><td>Turborepo, pnpm workspaces</td></tr>
+              <tr><td>Containerisation</td><td>Docker (BuildKit, multi-stage)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Team topology (Conway's Law aligned)</div>
+      <div class="three-col">
+        <div class="comp-box">
+          <div class="comp-box-head" style="background:#1B2A4A"><div class="dot" style="background:#FF4500"></div>Commerce squad</div>
+          <div class="comp-box-body"><ul>
+            <li>POS, Inventory, Purchasing, Sales/CRM</li>
+            <li>~4-6 engineers</li>
+            <li>Owns M01–M04</li>
+            <li>On-call: POS terminal stability</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head" style="background:#1B2A4A"><div class="dot" style="background:#3B82F6"></div>Finance squad</div>
+          <div class="comp-box-body"><ul>
+            <li>Finance, Payments, Lottery, HR</li>
+            <li>~3-4 engineers</li>
+            <li>Owns M05, M06, M12, M13</li>
+            <li>On-call: payment auth, payroll</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head" style="background:#1B2A4A"><div class="dot" style="background:#0D9488"></div>Verticals squad</div>
+          <div class="comp-box-body"><ul>
+            <li>Gas Station, Loyalty, Delivery, Shipping</li>
+            <li>~3-4 engineers</li>
+            <li>Owns M07–M09, M11</li>
+            <li>On-call: pump connectivity, delivery</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head" style="background:#1B2A4A"><div class="dot" style="background:#7C3AED"></div>AI / Data squad</div>
+          <div class="comp-box-body"><ul>
+            <li>AI Engine, Analytics, Reporting</li>
+            <li>~2-3 ML engineers + 1 data engineer</li>
+            <li>Owns M14, ClickHouse pipeline</li>
+            <li>On-call: model drift, pipeline failures</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head" style="background:#1B2A4A"><div class="dot" style="background:#D97706"></div>Platform squad</div>
+          <div class="comp-box-body"><ul>
+            <li>Auth, Infra, DevOps, Admin module</li>
+            <li>~2-3 engineers</li>
+            <li>Owns M15, Keycloak, Kafka, K8s</li>
+            <li>On-call: infrastructure, auth, security</li>
+          </ul></div>
+        </div>
+        <div class="comp-box">
+          <div class="comp-box-head" style="background:#1B2A4A"><div class="dot" style="background:#16A34A"></div>Frontend squad</div>
+          <div class="comp-box-body"><ul>
+            <li>Web app, POS UI, Mobile apps</li>
+            <li>~3-4 frontend engineers</li>
+            <li>Shared component library (packages/ui)</li>
+            <li>Design system ownership</li>
+          </ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">10</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 12 — RBAC
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="rbac">
+  <div class="sec-header">
+    <div class="sec-num">11</div>
+    <div>
+      <div class="sec-title">RBAC Design</div>
+      <div class="sec-desc">15-level role hierarchy and module permission matrix</div>
+    </div>
+  </div>
+  <div class="sec-body">
+    <div class="arch-section">
+      <div class="arch-label">Role hierarchy</div>
+      <table class="arch-table">
+        <thead><tr><th>Level</th><th>Role</th><th>Scope</th><th>Login method</th><th>MFA</th></tr></thead>
+        <tbody>
+          <tr><td><code>L0</code></td><td><strong>Super Admin</strong></td><td>Platform-wide (Diigoo operator)</td><td>Email + password</td><td>Mandatory</td></tr>
+          <tr><td><code>L1</code></td><td><strong>Owner / CEO</strong></td><td>Entire business org — all stores</td><td>SSO or email + password</td><td>Mandatory</td></tr>
+          <tr><td><code>L2</code></td><td><strong>Regional Manager</strong></td><td>Multiple stores (cluster)</td><td>Email + password</td><td>Mandatory</td></tr>
+          <tr><td><code>L3</code></td><td><strong>Store Manager</strong></td><td>Single store — full control</td><td>Email + password</td><td>Recommended</td></tr>
+          <tr><td><code>L4</code></td><td><strong>Assistant Manager</strong></td><td>Single store — limited financial access</td><td>Email + password</td><td>Optional</td></tr>
+          <tr><td><code>L5</code></td><td><strong>Cashier / Store Clerk</strong></td><td>POS terminal only</td><td>4-6 digit PIN</td><td>N/A</td></tr>
+          <tr><td><code>L6</code></td><td><strong>Inventory Staff</strong></td><td>Inventory module only</td><td>Email + password</td><td>Optional</td></tr>
+          <tr><td><code>L7</code></td><td><strong>Delivery Manager</strong></td><td>Delivery module</td><td>Email + password</td><td>Optional</td></tr>
+          <tr><td><code>L8</code></td><td><strong>Delivery Driver</strong></td><td>Own deliveries only — mobile app</td><td>Mobile OTP</td><td>Built-in (OTP)</td></tr>
+          <tr><td><code>L9</code></td><td><strong>Accountant</strong></td><td>Finance module — full access</td><td>Email + password + IP allowlist</td><td>Mandatory</td></tr>
+          <tr><td><code>L10</code></td><td><strong>HR Manager</strong></td><td>HR module — employee records, payroll</td><td>Email + password</td><td>Recommended</td></tr>
+          <tr><td><code>L11</code></td><td><strong>Marketing Staff</strong></td><td>CRM, email, loyalty modules</td><td>Email + password</td><td>Optional</td></tr>
+          <tr><td><code>L12</code></td><td><strong>IT Admin</strong></td><td>System config — no financial data</td><td>Email + password</td><td>Mandatory</td></tr>
+          <tr><td><code>L13</code></td><td><strong>Auditor (Read-Only)</strong></td><td>All modules — view only</td><td>Magic link + IP allowlist</td><td>Mandatory</td></tr>
+          <tr><td><code>L14</code></td><td><strong>Franchise Partner</strong></td><td>Own franchise unit — cannot see other franchisees</td><td>SSO or email + password</td><td>Mandatory</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Module permission matrix</div>
+      <div style="overflow-x:auto">
+        <table class="rbac-table">
+          <thead>
+            <tr>
+              <th>Module</th>
+              <th>Owner</th><th>Reg Mgr</th><th>Store Mgr</th><th>Asst Mgr</th><th>Cashier</th>
+              <th>Inv Staff</th><th>Accountant</th><th>Marketing</th><th>IT Admin</th><th>Auditor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>POS</td><td class="perm-view">View</td><td class="perm-view">View</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-op">Operate</td><td class="perm-none">—</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Inventory</td><td class="perm-view">View</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-edit">Edit</td><td class="perm-view">View</td><td class="perm-full">Full</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Purchasing</td><td class="perm-op">Approve</td><td class="perm-op">Approve</td><td class="perm-edit">Create/Appr</td><td class="perm-edit">Create</td><td class="perm-none">—</td><td class="perm-edit">Create</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Sales & CRM</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-edit">Edit</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-view">View</td><td class="perm-full">Full</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Finance</td><td class="perm-full">Full</td><td class="perm-view">View</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-full">Full</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Lottery</td><td class="perm-view">View</td><td class="perm-view">View</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-op">Operate</td><td class="perm-none">—</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Gas Station</td><td class="perm-view">View</td><td class="perm-view">View</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-op">Operate</td><td class="perm-op">Restock</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Loyalty / CRM</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-edit">Edit</td><td class="perm-op">Redeem</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-full">Full</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Delivery</td><td class="perm-view">View</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Email / Comms</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-edit">Edit</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-full">Full</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>Payments</td><td class="perm-full">Full</td><td class="perm-view">View</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-op">Operate</td><td class="perm-none">—</td><td class="perm-full">Full</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>HR / Payroll</td><td class="perm-full">Full</td><td class="perm-view">View</td><td class="perm-view">View</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-full">Full</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>AI Analytics</td><td class="perm-full">Full</td><td class="perm-full">Full</td><td class="perm-edit">Store-level</td><td class="perm-edit">Store-level</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-edit">Fin only</td><td class="perm-edit">CRM only</td><td class="perm-none">—</td><td class="perm-view">View</td></tr>
+            <tr><td>System Admin</td><td class="perm-full">Full</td><td class="perm-edit">Limited</td><td class="perm-edit">Limited</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-none">—</td><td class="perm-full">Full</td><td class="perm-view">View</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note-box mt16">
+        <strong>Permission legend</strong>
+        <span style="color:#16A34A;font-weight:700">Full</span> = create, read, update, delete &nbsp;|&nbsp; <span style="color:#1D4ED8">View</span> = read-only &nbsp;|&nbsp; <span style="color:#D97706">Edit</span> = read + write (no delete) &nbsp;|&nbsp; <span style="color:#7C3AED">Operate</span> = workflow actions only (e.g. process sale, redeem points) &nbsp;|&nbsp; — = no access
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">11</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 13 — API DESIGN
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="api">
+  <div class="sec-header">
+    <div class="sec-num">12</div>
+    <div>
+      <div class="sec-title">API Design Architecture</div>
+      <div class="sec-desc">REST standards, versioning, auth, error handling, and core endpoints</div>
+    </div>
+  </div>
+  <div class="sec-body">
+    <div class="arch-section">
+      <div class="arch-label">API standards</div>
+      <div class="two-col">
+        <table class="arch-table">
+          <thead><tr><th>Concern</th><th>Decision</th></tr></thead>
+          <tbody>
+            <tr><td>Style</td><td>REST (primary) + GraphQL (analytics/reporting layer only)</td></tr>
+            <tr><td>Format</td><td>JSON everywhere. <code>Content-Type: application/json</code></td></tr>
+            <tr><td>Versioning</td><td>URI versioning: <code>/api/v1/</code> <code>/api/v2/</code> — breaking changes bump major</td></tr>
+            <tr><td>Deprecation</td><td>12-month notice minimum. <code>Sunset:</code> header on deprecated routes</td></tr>
+            <tr><td>Auth</td><td><code>Authorization: Bearer &lt;JWT&gt;</code> on every request</td></tr>
+            <tr><td>Machine-to-machine</td><td>OAuth 2.0 Client Credentials flow (gateway integrations)</td></tr>
+            <tr><td>POS integrations</td><td>API Keys (scoped UUID hash, shown once on creation)</td></tr>
+            <tr><td>Rate limits</td><td>1,000 req/min (standard) · 10,000 req/min (enterprise)</td></tr>
+            <tr><td>Pagination</td><td>Cursor-based for large sets; page-based for UI lists</td></tr>
+            <tr><td>Documentation</td><td>OpenAPI 3.1 spec auto-generated; dev portal at <code>/docs</code></td></tr>
+            <tr><td>Idempotency</td><td><code>Idempotency-Key: uuid</code> header on all POST writes</td></tr>
+            <tr><td>SDK</td><td>TypeScript + Python SDKs versioned in lockstep with API</td></tr>
+          </tbody>
+        </table>
+        <div>
+          <div class="sub-section-title" style="margin-top:0">Response envelope</div>
+          <pre style="background:var(--navy);color:#C0C8D8;padding:14px;border-radius:var(--r);font-size:10px;font-family:'DM Mono',monospace;line-height:1.7">// Success
+{
+  "status": "success",
+  "data": { ... },
+  "meta": {
+    "page": 1,
+    "total": 248,
+    "request_id": "uuid"
+  }
+}
+
+// Error
+{
+  "status": "error",
+  "error": {
+    "code": "INSUFFICIENT_STOCK",
+    "message": "...",
+    "details": { ... }
+  },
+  "meta": { "request_id": "uuid" }
+}</pre>
+          <div class="note-box">
+            <strong>HTTP status codes</strong>
+            200 OK · 201 Created · 400 Bad Request · 401 Unauthorized · 403 Forbidden · 404 Not Found · 409 Conflict · 422 Validation Error · 429 Rate Limited · 500 Server Error
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Core endpoint reference</div>
+      <table class="arch-table">
+        <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th><th>Min role</th></tr></thead>
+        <tbody>
+          <tr><td><code>/api/v1/transactions</code></td><td>POST</td><td>Create POS transaction with line items and payments</td><td>Cashier</td></tr>
+          <tr><td><code>/api/v1/transactions/{id}/refund</code></td><td>POST</td><td>Full or partial refund with reason code</td><td>Asst Manager</td></tr>
+          <tr><td><code>/api/v1/inventory?store_id=&sku=</code></td><td>GET</td><td>Real-time stock levels, filterable by store, SKU, below_reorder_point</td><td>Inventory Staff</td></tr>
+          <tr><td><code>/api/v1/inventory/{id}/adjust</code></td><td>PATCH</td><td>Manual stock adjustment with qty_delta and reason_code</td><td>Store Manager</td></tr>
+          <tr><td><code>/api/v1/purchase-orders</code></td><td>POST</td><td>Create PO draft — supplier_id, store_id, lines[]</td><td>Inventory Staff</td></tr>
+          <tr><td><code>/api/v1/customers/{id}</code></td><td>GET</td><td>Customer profile, loyalty balance, purchase history</td><td>Cashier</td></tr>
+          <tr><td><code>/api/v1/customers/{id}/loyalty/redeem</code></td><td>POST</td><td>Redeem loyalty points against transaction</td><td>Cashier</td></tr>
+          <tr><td><code>/api/v1/reports/sales-summary</code></td><td>GET</td><td>Sales summary with date range and group_by params</td><td>Store Manager</td></tr>
+          <tr><td><code>/api/v1/delivery-orders</code></td><td>POST</td><td>Create delivery from sale; optional driver assignment</td><td>Delivery Manager</td></tr>
+          <tr><td><code>/api/v1/fuel/tanks?store_id=</code></td><td>GET</td><td>Live tank levels and grade breakdown</td><td>Store Manager</td></tr>
+          <tr><td><code>/api/v1/lottery/books/{id}/reconcile</code></td><td>POST</td><td>End-of-day lottery book reconciliation</td><td>Store Manager</td></tr>
+          <tr><td><code>/api/v1/ai/query</code></td><td>POST</td><td>Natural language query → SQL + result + explanation</td><td>Store Manager</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">12</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 14 — SLA & PERFORMANCE
+     ══════════════════════════════════════════════════════════ -->
+<div class="page" id="sla">
+  <div class="sec-header">
+    <div class="sec-num">13</div>
+    <div>
+      <div class="sec-title">SLA & Performance Architecture</div>
+      <div class="sec-desc">Uptime targets, response time benchmarks, and load specifications</div>
+    </div>
+  </div>
+  <div class="sec-body">
+    <div class="arch-section">
+      <div class="arch-label">Availability SLA by tier</div>
+      <div class="sla-grid">
+        <div class="sla-card">
+          <div class="sla-tier">Starter</div>
+          <div class="sla-pct">99.9%</div>
+          <div class="sla-detail">43.8 min/month downtime<br>RTO: 4h · RPO: 1h<br>Email support (24h)<br>$49/store/month</div>
+        </div>
+        <div class="sla-card">
+          <div class="sla-tier">Growth</div>
+          <div class="sla-pct">99.95%</div>
+          <div class="sla-detail">21.9 min/month downtime<br>RTO: 2h · RPO: 30min<br>Email + Chat (4h SLA)<br>$149/store/month</div>
+        </div>
+        <div class="sla-card" style="border-color:var(--orange)">
+          <div class="sla-tier" style="color:var(--orange)">Business</div>
+          <div class="sla-pct" style="color:var(--orange)">99.99%</div>
+          <div class="sla-detail">4.4 min/month downtime<br>RTO: 1h · RPO: 15min<br>Phone + Chat (1h SLA)<br>$299/store/month</div>
+        </div>
+        <div class="sla-card" style="background:var(--navy);border-color:var(--navy)">
+          <div class="sla-tier" style="color:var(--silver)">Enterprise</div>
+          <div class="sla-pct" style="color:white">99.995%</div>
+          <div class="sla-detail" style="color:var(--silver)">2.2 min/month downtime<br>RTO: 30min · RPO: 5min<br>Dedicated TAM (30min)<br>Custom pricing</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Response time targets</div>
+      <table class="arch-table">
+        <thead><tr><th>Operation</th><th>p50 target</th><th>p95 target</th><th>p99 target</th><th>Measurement point</th></tr></thead>
+        <tbody>
+          <tr><td>POS transaction (full checkout)</td><td><strong>&lt; 300ms</strong></td><td>&lt; 600ms</td><td>&lt; 1,200ms</td><td>Client → API → DB → Response</td></tr>
+          <tr><td>Barcode scan / item lookup</td><td><strong>&lt; 80ms</strong></td><td>&lt; 150ms</td><td>&lt; 300ms</td><td>API response time</td></tr>
+          <tr><td>Payment authorisation</td><td><strong>&lt; 1,500ms</strong></td><td>&lt; 3,000ms</td><td>&lt; 5,000ms</td><td>End-to-end incl. processor</td></tr>
+          <tr><td>Inventory level query</td><td><strong>&lt; 100ms</strong></td><td>&lt; 200ms</td><td>&lt; 400ms</td><td>API response time</td></tr>
+          <tr><td>Customer lookup (POS)</td><td><strong>&lt; 150ms</strong></td><td>&lt; 300ms</td><td>&lt; 600ms</td><td>API response time</td></tr>
+          <tr><td>Dashboard load (initial)</td><td><strong>&lt; 1,500ms</strong></td><td>&lt; 2,500ms</td><td>&lt; 4,000ms</td><td>Time to Interactive</td></tr>
+          <tr><td>Standard report generation</td><td><strong>&lt; 2,000ms</strong></td><td>&lt; 5,000ms</td><td>&lt; 10,000ms</td><td>API response time</td></tr>
+          <tr><td>Large / custom report</td><td><strong>&lt; 10s</strong></td><td>&lt; 30s</td><td>&lt; 60s</td><td>Async job completion</td></tr>
+          <tr><td>Webhook delivery</td><td><strong>&lt; 500ms</strong></td><td>&lt; 2,000ms</td><td>&lt; 5,000ms</td><td>Event → webhook endpoint</td></tr>
+          <tr><td>Offline sync on reconnect</td><td><strong>&lt; 5s</strong></td><td>&lt; 15s</td><td>&lt; 30s</td><td>Sync completion time</td></tr>
+          <tr><td>Mobile app cold start</td><td><strong>&lt; 1,000ms</strong></td><td>&lt; 2,000ms</td><td>&lt; 3,500ms</td><td>Usable state time</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="arch-section mt24">
+      <div class="arch-label">Throughput & load specifications</div>
+      <div class="two-col">
+        <table class="arch-table">
+          <thead><tr><th>Metric</th><th>Baseline</th><th>Peak (auto-scale)</th></tr></thead>
+          <tbody>
+            <tr><td>Transactions per second (platform-wide)</td><td>500 TPS sustained</td><td>5,000 TPS burst</td></tr>
+            <tr><td>API requests per second (platform-wide)</td><td>10,000 RPS</td><td>100,000 RPS</td></tr>
+            <tr><td>Concurrent POS terminals (per tenant)</td><td>Up to 50</td><td>500 (enterprise)</td></tr>
+            <tr><td>Inventory sync events/sec</td><td>2,000/sec</td><td>20,000/sec</td></tr>
+            <tr><td>Webhook deliveries/sec</td><td>1,000/sec</td><td>10,000/sec</td></tr>
+            <tr><td>Marketing email sends/hour</td><td>100,000/hour</td><td>1,000,000/hour</td></tr>
+            <tr><td>Database queries/sec</td><td>5,000 QPS</td><td>50,000 QPS (with read replicas)</td></tr>
+            <tr><td>Concurrent report users</td><td>200</td><td>2,000</td></tr>
+          </tbody>
+        </table>
+        <div>
+          <div class="sub-section-title" style="margin-top:0">Load testing strategy</div>
+          <div class="comp-box">
+            <div class="comp-box-head"><div class="dot" style="background:#16A34A"></div>k6 automated tests (CI-embedded)</div>
+            <div class="comp-box-body"><ul>
+              <li>Baseline: 500 VUs, 30-min sustained, all critical API paths — runs on every release</li>
+              <li>Stress test: ramp to 5,000 VU to identify breaking point — quarterly</li>
+              <li>POS soak: 1,000 tx/hour/terminal, 10-hour shift simulation</li>
+              <li>Chaos engineering: random pod kill, network partition, DB failover — monthly in staging</li>
+              <li>Performance regression alert: &gt;20% p95 degradation vs last release → block deploy</li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p><strong>Diigoo Tech Private Limited</strong> · Unified Retail & Commerce ERP · Architecture Document v2.0</p>
+    <p class="page-num">13</p>
+  </div>
+</div>
+
+</div><!-- /doc-wrap -->
+
+</body>
+</html>

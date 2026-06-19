@@ -1,0 +1,254 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────
+   Diigoo design tokens — mirrored from the architecture document
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* Brand + chart palette — fixed in both themes */
+  --navy: #334155;
+  --orange: #004680;
+  --orange-dark: #00365e;
+  --silver: #c0c8d8;
+  --white: #ffffff;
+  --teal: #0d9488;
+  --blue: #2563eb;
+  --purple: #7c3aed;
+  --green: #16a34a;
+  --amber: #d97706;
+  --coral: #dc2626;
+  /* Semantic surfaces + text — RGB channels, flipped under .dark */
+  --canvas: 234 237 242;
+  --surface: 255 255 255;
+  --subtle: 248 249 251;
+  --line: 229 231 235;
+  --ink: 17 24 39;
+  --ink-2: 55 65 81;
+  --ink-3: 107 114 128;
+  --r: 6px;
+}
+
+.dark {
+  --canvas: 13 17 28;
+  --surface: 22 28 42;
+  --subtle: 30 38 56;
+  --line: 42 52 76;
+  --ink: 237 242 249;
+  --ink-2: 197 207 222;
+  --ink-3: 142 154 176;
+}
+
+@layer base {
+  * {
+    @apply border-line;
+  }
+  html,
+  body {
+    height: 100%;
+  }
+  body {
+    background: rgb(var(--canvas));
+    color: rgb(var(--ink));
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-semibold text-navy;
+  }
+  /* refined scrollbars to keep the dense, professional feel */
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd2de;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #aab3c4;
+    background-clip: padding-box;
+  }
+}
+
+@layer components {
+  /* ─── Chips (ported from .chip-* in the doc) ─── */
+  .chip {
+    @apply inline-flex items-center whitespace-nowrap rounded px-2.5 py-1 text-xs font-medium;
+  }
+  .chip-navy { background: #e8edf7; color: var(--navy); border: 1px solid #c5d0e8; }
+  .chip-teal { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+  .chip-blue { background: #dbeafe; color: var(--blue); border: 1px solid #bfdbfe; }
+  .chip-purple { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+  .chip-green { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .chip-amber { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+  .chip-coral { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+  .chip-gray { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+  .chip-orange { background: #eaf2f8; color: #004680; border: 1px solid #c2dbf0; }
+
+  /* ─── Data table (ported from .arch-table) ─── */
+  .dtable {
+    @apply w-full border-collapse text-sm;
+  }
+  .dtable thead th {
+    @apply border-b border-line bg-subtle px-3 py-2.5 text-left text-xs font-semibold tracking-wide text-ink-2;
+  }
+  .dtable thead th:first-child { border-radius: 6px 0 0 0; }
+  .dtable thead th:last-child { border-radius: 0 6px 0 0; }
+  .dtable tbody td {
+    @apply border-b border-line px-3 py-2.5 align-middle text-ink-2;
+  }
+  .dtable tbody tr:last-child td { border-bottom: none; }
+  .dtable tbody tr:nth-child(even) td { background: rgb(var(--subtle)); }
+  .dtable tbody tr:hover td { background: #eef2ff; }
+
+  /* ─── Section header band (ported from .sec-header) ─── */
+  .sec-header {
+    @apply flex items-center gap-4 border-b border-line bg-subtle px-6 py-5;
+  }
+  .sec-num {
+    @apply flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-orange text-xs font-bold text-white;
+  }
+
+  /* ─── Sub-section title (ported) ─── */
+  .sub-title {
+    @apply mb-2.5 mt-5 flex items-center gap-2 border-b-2 border-orange pb-1.5 text-md font-bold text-navy;
+  }
+  .sub-title::before {
+    content: "";
+    @apply inline-block h-4 w-1 rounded-sm bg-orange;
+  }
+
+  /* ─── Note box (ported from .note-box) ─── */
+  .note-box {
+    @apply rounded border border-amber/40 border-l-[3px] border-l-amber bg-[#fffbeb] px-3.5 py-2.5 text-xs text-[#92400e];
+  }
+
+  /* ─── Permission cell tints ─── */
+  .perm-full { @apply font-bold text-green; }
+  .perm-view { @apply text-blue; }
+  .perm-edit { @apply text-amber; }
+  .perm-op { @apply text-purple; }
+  .perm-none { @apply text-line; }
+
+  /* ─── Focus ring used across interactive controls ─── */
+  .focus-ring {
+    @apply outline-none ring-offset-2 ring-offset-surface focus-visible:ring-2 focus-visible:ring-orange/60;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Org chart — top-down tree with pure-CSS connector lines
+   ───────────────────────────────────────────────────────────── */
+.org-tree,
+.org-tree ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.org-tree {
+  display: flex;
+  width: max-content;
+}
+.org-tree ul {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  padding-top: 24px;
+}
+.org-tree li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 10px 0;
+}
+/* horizontal bus + vertical drop into each node */
+.org-tree li::before,
+.org-tree li::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 50%;
+  width: 50%;
+  height: 24px;
+  border-top: 2px solid var(--silver);
+}
+.org-tree li::after {
+  right: auto;
+  left: 50%;
+  border-left: 2px solid var(--silver);
+}
+.org-tree li:only-child {
+  padding-top: 0;
+}
+.org-tree li:only-child::before,
+.org-tree li:only-child::after {
+  display: none;
+}
+.org-tree li:first-child::before,
+.org-tree li:last-child::after {
+  border: 0 none;
+}
+.org-tree li:last-child::before {
+  border-right: 2px solid var(--silver);
+  border-radius: 0 6px 0 0;
+}
+.org-tree li:first-child::after {
+  border-radius: 6px 0 0 0;
+}
+/* vertical line from a parent node down to its children's bus */
+.org-tree ul::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 24px;
+  border-left: 2px solid var(--silver);
+}
+/* root node has nothing above it */
+.org-tree > li {
+  padding-top: 0;
+}
+.org-tree > li::before,
+.org-tree > li::after {
+  display: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Dark theme — overrides where fixed brand colours act as foreground
+   on content surfaces (navy text/headings/SVG fills, hovers, bars).
+   ───────────────────────────────────────────────────────────── */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4 {
+  color: rgb(var(--ink));
+}
+.dark .text-navy {
+  color: rgb(var(--ink));
+}
+.dark .fill-navy {
+  fill: rgb(var(--ink));
+}
+.dark .dtable tbody tr:hover td {
+  background: rgb(var(--subtle));
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #39435c;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4b577a;
+}
